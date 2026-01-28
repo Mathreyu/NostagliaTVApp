@@ -2,6 +2,9 @@
 
 A Google TV app that creates virtual channels with scheduled-style programming and launches content via deep links to streaming providers.
 
+<img width="812" height="460" alt="image" src="https://github.com/user-attachments/assets/055c116b-48b0-4e76-bebd-77b37bfa511d" />
+
+
 ## What It Does
 
 - Users tune into a channel instead of choosing episodes.
