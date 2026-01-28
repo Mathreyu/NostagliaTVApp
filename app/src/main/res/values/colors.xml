@@ -1,0 +1,9 @@
+<resources>
+    <color name="launcher_background">#0B0B14</color>
+    <color name="nostalgia_background">#0B0B14</color>
+    <color name="nostalgia_surface">#1A1A2E</color>
+    <color name="nostalgia_primary">#FF4FD8</color>
+    <color name="nostalgia_secondary">#33F6FF</color>
+    <color name="nostalgia_tertiary">#FFE66D</color>
+    <color name="nostalgia_on_dark">#FDFCFB</color>
+</resources>
