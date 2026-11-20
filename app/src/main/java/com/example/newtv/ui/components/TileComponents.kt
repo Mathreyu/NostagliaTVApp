@@ -79,23 +79,21 @@ fun TileCard(
                         listOf(accent.copy(alpha = 0.30f), Color.Transparent)
                     )
                 )
-                .padding(14.dp),
+                .padding(horizontal = 18.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(8.dp)
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = NostalgiaColors.TextMuted,
-                modifier = Modifier.padding(8.dp)
+                color = NostalgiaColors.TextMuted
             )
         }
     }

@@ -42,6 +42,7 @@ import com.example.newtv.ui.components.NoSignalCard
 import com.example.newtv.ui.components.NostalgiaButton
 import com.example.newtv.ui.components.OsdHeading
 import com.example.newtv.ui.components.ScreenScaffold
+import com.example.newtv.ui.components.bleed
 import com.example.newtv.ui.components.rememberInitialFocus
 import com.example.newtv.ui.components.tryRequestFocus
 import java.time.ZoneId
@@ -121,8 +122,9 @@ private fun LiveSection(
         OsdHeading(stringResource(R.string.home_live_now))
         LazyRow(
             state = rowState,
+            modifier = Modifier.bleed(Spacing.M),
             horizontalArrangement = Arrangement.spacedBy(Spacing.L),
-            contentPadding = PaddingValues(horizontal = Spacing.S, vertical = 10.dp)
+            contentPadding = PaddingValues(horizontal = Spacing.M, vertical = 10.dp)
         ) {
             items(channels, key = { it.id }) { channel ->
                 val program = uiState.nowPlaying[channel.id]

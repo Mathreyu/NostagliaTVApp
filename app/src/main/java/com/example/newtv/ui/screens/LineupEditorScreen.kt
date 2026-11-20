@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import com.example.newtv.ui.components.scrollEdgeFades
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.newtv.R
 import com.example.newtv.ui.MainUiState
 import com.example.newtv.ui.Spacing
@@ -62,8 +65,12 @@ fun LineupEditorScreen(
                 if (editor.shows.isEmpty()) {
                     HelpLine(stringResource(R.string.lineup_empty_library))
                 } else {
+                    val listState = rememberLazyListState()
                     LazyColumn(
-                        modifier = Modifier.weight(1f, fill = false),
+                        state = listState,
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .scrollEdgeFades({ listState.canScrollBackward }, { listState.canScrollForward }),
                         verticalArrangement = Arrangement.spacedBy(Spacing.S)
                     ) {
                         items(editor.shows, key = { it.id }) { show ->
@@ -82,7 +89,8 @@ fun LineupEditorScreen(
                                         valueText = stringResource(
                                             if (show.id in editor.selected) R.string.on else R.string.off
                                         ),
-                                        onClick = { onToggle(show.id) }
+                                        onClick = { onToggle(show.id) },
+                                        valueWidth = 112.dp
                                     )
                                 }
                                 NostalgiaButton(

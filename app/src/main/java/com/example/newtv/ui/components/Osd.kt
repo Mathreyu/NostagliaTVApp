@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import com.example.newtv.R
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.tv.material3.MaterialTheme
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -117,11 +118,18 @@ fun OsdBanner(text: String, tone: OsdTone = OsdTone.Info, modifier: Modifier = M
                 .background(color)
         )
         Text(
-            text = (if (tone == OsdTone.Error) "ERROR  " else "INFO  ") + text,
+            text = if (tone == OsdTone.Error) "ERROR" else "INFO",
             style = osdTextStyle(26, color),
+            maxLines = 1,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = NostalgiaColors.TextPrimary,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+            modifier = Modifier.weight(1f, fill = false).padding(start = 14.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
         )
     }
 }
@@ -222,8 +230,10 @@ fun OsdHeading(text: String, modifier: Modifier = Modifier) {
 fun HelpLine(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
-        style = osdTextStyle(22, NostalgiaColors.TextMuted, glow = false),
+        style = MaterialTheme.typography.bodyMedium,
+        color = NostalgiaColors.TextMuted,
         maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
     )
 }

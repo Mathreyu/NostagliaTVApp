@@ -60,18 +60,12 @@ fun ParentalLockPad(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val firstKey = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        try {
-            firstKey.requestFocus()
-        } catch (_: IllegalStateException) {
-            // Not attached yet; focus falls back to default traversal.
-        }
-    }
+    // Waits one frame so the key is attached before focus is requested.
+    val firstKey = rememberInitialFocus()
     Row(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(48.dp)
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             modifier = Modifier.width(380.dp),
@@ -98,7 +92,7 @@ fun ParentalLockPad(
                 }
             }
             // Reserve the error line so the layout does not jump.
-            Box(Modifier.height(44.dp), contentAlignment = Alignment.CenterStart) {
+            Box(Modifier.height(76.dp), contentAlignment = Alignment.TopStart) {
                 if (error != null) OsdBanner(text = error, tone = OsdTone.Error)
             }
             NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)

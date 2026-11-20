@@ -50,8 +50,29 @@ fun ShowEditorScreen(
                 title = stringResource(
                     if (editor.isNew) R.string.show_editor_add_title else R.string.show_editor_edit_title
                 ),
-                modifier = Modifier.width(MenuWidth).verticalScroll(rememberScrollState()),
-                contentSpacing = Spacing.S
+                modifier = Modifier.width(MenuWidth),
+                contentSpacing = Spacing.S,
+                scrollable = true,
+                footer = {
+                    when {
+                        editor.error != null -> OsdBanner(text = editor.error, tone = OsdTone.Error)
+                        editor.confirmingDelete ->
+                            OsdBanner(text = stringResource(R.string.delete_show_warning), tone = OsdTone.Error)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+                        NostalgiaButton(text = stringResource(R.string.save), onClick = onSave)
+                        NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
+                        if (!editor.isNew) {
+                            NostalgiaButton(
+                                text = stringResource(
+                                    if (editor.confirmingDelete) R.string.delete_show_confirm else R.string.delete_show
+                                ),
+                                onClick = onDelete,
+                                secondary = true
+                            )
+                        }
+                    }
+                }
             ) {
                 TvTextField(
                     label = stringResource(R.string.show_title),
@@ -104,25 +125,7 @@ fun ShowEditorScreen(
                         onIncrement = { onStepLink(+1) }
                     )
                 }
-                when {
-                    editor.error != null -> OsdBanner(text = editor.error, tone = OsdTone.Error)
-                    editor.confirmingDelete ->
-                        OsdBanner(text = stringResource(R.string.delete_show_warning), tone = OsdTone.Error)
-                    else -> HelpLine(stringResource(R.string.show_editor_help))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                    NostalgiaButton(text = stringResource(R.string.save), onClick = onSave)
-                    NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
-                    if (!editor.isNew) {
-                        NostalgiaButton(
-                            text = stringResource(
-                                if (editor.confirmingDelete) R.string.delete_show_confirm else R.string.delete_show
-                            ),
-                            onClick = onDelete,
-                            secondary = true
-                        )
-                    }
-                }
+                if (editor.error == null && !editor.confirmingDelete) HelpLine(stringResource(R.string.show_editor_help))
             }
         }
     }

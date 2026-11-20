@@ -2,7 +2,7 @@
 
 A Google TV app that creates virtual channels with scheduled-style programming and launches content via deep links to streaming providers.
 
-<img width="812" height="460" alt="image" src="https://github.com/user-attachments/assets/055c116b-48b0-4e76-bebd-77b37bfa511d" />
+<img src="app/src/test/screenshots/home.png" alt="NostalgiaTV home: live channel cards and a coming-up guide" width="640" />
 
 
 ## What It Does
@@ -29,6 +29,16 @@ A Google TV app that creates virtual channels with scheduled-style programming a
 - Room (local database, schema v4 with migrations; exported schemas live in `app/schemas`)
 - Android TV 12+ target
 
+## Screenshots
+
+Rendered by the JVM screenshot tests at 1920x1080 ("Cable box, circa 1997").
+
+| Home | Channel |
+| --- | --- |
+| <img src="app/src/test/screenshots/home_focus.png" width="420" /> | <img src="app/src/test/screenshots/channel.png" width="420" /> |
+| **Guide** | **Parental lock** |
+| <img src="app/src/test/screenshots/schedule.png" width="420" /> | <img src="app/src/test/screenshots/pin_pad_verify_error.png" width="420" /> |
+
 ## Build
 
 Requires JDK 17 (the Gradle toolchain is set to 17).
@@ -36,6 +46,16 @@ Requires JDK 17 (the Gradle toolchain is set to 17).
 ```
 ./gradlew assembleDebug testDebugUnitTest lintDebug
 ```
+
+The screenshots in `app/src/test/screenshots` come from Roborazzi + Robolectric tests
+(`app/src/test/java/com/example/newtv/screenshots`). Plain `testDebugUnitTest` only checks that every
+screen renders; it never writes or compares images. To re-record them after a UI change:
+
+```
+./gradlew recordRoborazziDebug
+```
+
+(`./gradlew verifyRoborazziDebug` fails on any pixel difference from the committed images.)
 
 ## Architecture
 

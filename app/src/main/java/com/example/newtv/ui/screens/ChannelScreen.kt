@@ -45,6 +45,7 @@ import com.example.newtv.ui.components.ChannelBug
 import com.example.newtv.ui.components.NoSignalCard
 import com.example.newtv.ui.components.NostalgiaButton
 import com.example.newtv.ui.components.OsdBanner
+import com.example.newtv.ui.components.bleed
 import com.example.newtv.ui.components.OsdHeading
 import com.example.newtv.ui.components.OsdTone
 import com.example.newtv.ui.components.ScreenScaffold
@@ -54,6 +55,9 @@ import com.example.newtv.ui.osdTextStyle
 import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+
+/** Room reserved around scrolling rows so a focused (scaled, glowing) item is not clipped. */
+private val FocusBleed = 12.dp
 
 /** +1 for channel up / page up, -1 for channel down / page down, null for other keys. */
 internal fun channelKeyStep(keyCode: Int): Int? = when (keyCode) {
@@ -125,7 +129,11 @@ fun ChannelScreen(
 
         // The body scrolls as a safety net on very small viewports; normally everything fits.
         Column(
-            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 6.dp, vertical = 4.dp),
+            modifier = Modifier
+                .weight(1f)
+                .bleed(FocusBleed)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = FocusBleed, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(Spacing.M)
         ) {
         val providerName = program?.show?.provider?.displayName
@@ -206,8 +214,9 @@ fun ChannelScreen(
         if (uiState.schedule.isNotEmpty()) {
             OsdHeading(stringResource(R.string.up_next))
             LazyRow(
+                modifier = Modifier.bleed(FocusBleed),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.M),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.S, vertical = Spacing.S)
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = FocusBleed, vertical = 6.dp)
             ) {
                 items(uiState.schedule) { item ->
                     val timeLabel = formatter.format(item.startTime.atZone(zone))
@@ -215,8 +224,8 @@ fun ChannelScreen(
                         title = item.show.title,
                         subtitle = stringResource(R.string.program_time_episode, timeLabel, item.season, item.episode),
                         onClick = { selectedUpNext = item },
-                        width = 232.dp,
-                        height = 88.dp,
+                        width = 256.dp,
+                        height = 72.dp,
                         accentSeed = "${item.show.id}-${item.episode}",
                         accent = accent
                     )

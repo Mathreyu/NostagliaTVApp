@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
@@ -72,13 +73,15 @@ data class GuideMetrics(
     val headerHeight: Dp,
     val headerTextSize: Int,
     val showEpisodeLine: Boolean,
-    val rowGap: Dp
+    val rowGap: Dp,
+    /** Lines the channel name may use in the channel column (compact guide wraps to two). */
+    val channelNameLines: Int = 1
 ) {
     companion object {
         val Regular = GuideMetrics(230.dp, 72.dp, 44.dp, 26, true, 4.dp)
         /** Single-channel strip on the schedule screen. */
-        val Strip = GuideMetrics(230.dp, 60.dp, 38.dp, 24, true, 3.dp)
-        val Compact = GuideMetrics(196.dp, 44.dp, 30.dp, 22, false, 3.dp)
+        val Strip = GuideMetrics(230.dp, 60.dp, 38.dp, 24, true, 3.dp, channelNameLines = 2)
+        val Compact = GuideMetrics(224.dp, 44.dp, 30.dp, 22, false, 3.dp, channelNameLines = 2)
     }
 }
 
@@ -198,8 +201,12 @@ private fun ChannelHeaderCell(row: GuideRowModel, metrics: GuideMetrics) {
         ChannelBug(number = row.number, accent = row.accent)
         Text(
             text = row.name,
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
+            style = if (metrics.channelNameLines > 1 && metrics.rowHeight < 56.dp) {
+                MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp)
+            } else {
+                MaterialTheme.typography.titleSmall
+            },
+            maxLines = metrics.channelNameLines,
             overflow = TextOverflow.Ellipsis
         )
     }

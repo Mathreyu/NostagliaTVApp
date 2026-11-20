@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -133,6 +135,8 @@ private fun ScreenContent(uiState: MainUiState, viewModel: MainViewModel) {
     }
 }
 
+private val PinWindowWidth = 820.dp
+
 /** Full-screen scrim with the parental lock keypad on a setup-menu window. */
 @Composable
 internal fun PinOverlay(
@@ -170,7 +174,10 @@ internal fun PinOverlay(
             .padding(horizontal = Spacing.SafeHorizontal, vertical = Spacing.SafeVertical),
         contentAlignment = Alignment.Center
     ) {
-        NostalgiaWindow(title = stringResource(R.string.pin_window_title)) {
+        NostalgiaWindow(
+            title = stringResource(R.string.pin_window_title),
+            modifier = Modifier.width(PinWindowWidth)
+        ) {
             ParentalLockPad(
                 title = title,
                 message = message,

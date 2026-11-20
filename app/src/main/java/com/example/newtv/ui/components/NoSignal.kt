@@ -105,7 +105,7 @@ fun NoSignalCard(
         ColorBars(Modifier.width(barsWidth).height(barsWidth * 0.56f))
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(text = title, style = osdTextStyle(56, NostalgiaColors.Error), maxLines = 1)
             Text(
@@ -115,7 +115,7 @@ fun NoSignalCard(
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 16.dp),
                 content = actions
             )
         }

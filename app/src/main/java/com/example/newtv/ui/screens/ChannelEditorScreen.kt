@@ -48,8 +48,28 @@ fun ChannelEditorScreen(
                 title = stringResource(
                     if (editor.isNew) R.string.channel_editor_add_title else R.string.channel_editor_edit_title
                 ),
-                modifier = Modifier.width(MenuWidth).verticalScroll(rememberScrollState()),
-                contentSpacing = Spacing.S
+                modifier = Modifier.width(MenuWidth),
+                contentSpacing = Spacing.S,
+                scrollable = true,
+                footer = {
+                    if (editor.error != null) OsdBanner(text = editor.error, tone = OsdTone.Error)
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+                        NostalgiaButton(text = stringResource(R.string.save), onClick = onSave)
+                        NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
+                        if (editor.channelId != null) {
+                            NostalgiaButton(
+                                text = stringResource(R.string.edit_rules),
+                                onClick = { onEditRules(editor.channelId) },
+                                secondary = true
+                            )
+                            NostalgiaButton(
+                                text = stringResource(R.string.edit_lineup),
+                                onClick = { onEditLineup(editor.channelId) },
+                                secondary = true
+                            )
+                        }
+                    }
+                }
             ) {
                 TvTextField(
                     label = stringResource(R.string.channel_name),
@@ -85,27 +105,7 @@ fun ChannelEditorScreen(
                         onClick = onToggleKidSafe
                     )
                 }
-                if (editor.error != null) {
-                    OsdBanner(text = editor.error, tone = OsdTone.Error)
-                } else {
-                    HelpLine(stringResource(R.string.channel_editor_help))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                    NostalgiaButton(text = stringResource(R.string.save), onClick = onSave)
-                    NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
-                    if (editor.channelId != null) {
-                        NostalgiaButton(
-                            text = stringResource(R.string.edit_rules),
-                            onClick = { onEditRules(editor.channelId) },
-                            secondary = true
-                        )
-                        NostalgiaButton(
-                            text = stringResource(R.string.edit_lineup),
-                            onClick = { onEditLineup(editor.channelId) },
-                            secondary = true
-                        )
-                    }
-                }
+                if (editor.error == null) HelpLine(stringResource(R.string.channel_editor_help))
             }
         }
     }

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +28,8 @@ import com.example.newtv.ui.NostalgiaColors
 import com.example.newtv.ui.NostalgiaShapes
 import com.example.newtv.ui.osdTextStyle
 
+/** Room around scrolling content for the focus scale and glow of edge items. */
+private val FocusBleed = 12.dp
 private val Bezel = Color(0xFF1C2038)
 private val BezelEdge = Color(0xFF3A4066)
 
@@ -38,9 +42,14 @@ fun NostalgiaWindow(
     title: String,
     modifier: Modifier = Modifier,
     contentSpacing: Dp = 16.dp,
+    /** Scroll the content (never the footer) when the window is taller than the screen. */
+    scrollable: Boolean = false,
+    /** Pinned below the (scrolling) content, e.g. the Save / Cancel row, so it never leaves the screen. */
+    footer: (@Composable ColumnScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val outer = NostalgiaShapes.Large
+    val scroll = rememberScrollState()
     Column(
         modifier = modifier
             .background(Bezel, outer)
@@ -70,9 +79,29 @@ fun NostalgiaWindow(
                 .background(NostalgiaColors.GuideLine)
         )
         Column(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .then(
+                    if (scrollable) {
+                        Modifier
+                            .bleed(FocusBleed)
+                            .scrollEdgeFades({ scroll.canScrollBackward }, { scroll.canScrollForward })
+                            .verticalScroll(scroll)
+                            .padding(horizontal = FocusBleed, vertical = 6.dp)
+                    } else {
+                        Modifier
+                    }
+                ),
             verticalArrangement = Arrangement.spacedBy(contentSpacing),
             content = content
         )
+        if (footer != null) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(contentSpacing),
+                content = footer
+            )
+        }
     }
 }
 

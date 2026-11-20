@@ -1,7 +1,12 @@
 package com.example.newtv.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.tv.material3.LocalContentColor
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
@@ -85,7 +92,7 @@ fun ValueRow(label: String, valueText: String, modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .width(StepperValueColumnWidth)
-                .height(48.dp)
+                .height(40.dp)
                 .padding(horizontal = 4.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -100,7 +107,8 @@ fun ToggleRow(
     label: String,
     valueText: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    valueWidth: Dp = StepperValueColumnWidth
 ) {
     val shape = NostalgiaShapes.Medium
     Row(
@@ -112,12 +120,14 @@ fun ToggleRow(
             text = label,
             style = MaterialTheme.typography.titleMedium,
             color = NostalgiaColors.TextPrimary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
         Surface(
             onClick = onClick,
             modifier = Modifier
-                .width(StepperValueColumnWidth)
+                .width(valueWidth)
                 .height(48.dp),
             shape = ClickableSurfaceDefaults.shape(shape),
             colors = ClickableSurfaceDefaults.colors(
@@ -174,7 +184,13 @@ private fun StepKey(label: String, onClick: () -> Unit) {
         )
     ) {
         Box(Modifier.fillMaxWidth().height(48.dp), contentAlignment = Alignment.Center) {
-            Text(text = label, style = MaterialTheme.typography.headlineMedium, color = Color.Unspecified)
+            val glyph = LocalContentColor.current
+            Canvas(Modifier.size(22.dp)) {
+                val stroke = 4.dp.toPx()
+                val c = Offset(size.width / 2f, size.height / 2f)
+                drawLine(glyph, Offset(0f, c.y), Offset(size.width, c.y), stroke, StrokeCap.Round)
+                if (label == "+") drawLine(glyph, Offset(c.x, 0f), Offset(c.x, size.height), stroke, StrokeCap.Round)
+            }
         }
     }
 }

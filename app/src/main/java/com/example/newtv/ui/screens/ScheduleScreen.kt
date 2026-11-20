@@ -67,7 +67,7 @@ fun ScheduleScreen(
     ScreenScaffold(kidSafe = uiState.kidSafeEnabled) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.L)) {
             Text(
-                text = stringResource(R.string.schedule_title),
+                text = stringResource(R.string.schedule_title).uppercase(),
                 style = osdTextStyle(40),
                 maxLines = 1
             )

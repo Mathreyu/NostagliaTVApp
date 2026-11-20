@@ -43,8 +43,16 @@ fun RuleEditorScreen(
         Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             NostalgiaWindow(
                 title = stringResource(R.string.rule_editor_title),
-                modifier = Modifier.width(MenuWidth).verticalScroll(rememberScrollState()),
-                contentSpacing = Spacing.S
+                modifier = Modifier.width(MenuWidth),
+                contentSpacing = Spacing.S,
+                scrollable = true,
+                footer = {
+                    if (editor.error != null) OsdBanner(text = editor.error, tone = OsdTone.Error)
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+                        NostalgiaButton(text = stringResource(R.string.save), onClick = onSave)
+                        NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
+                    }
+                }
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
                     StepperRow(
@@ -79,15 +87,7 @@ fun RuleEditorScreen(
                         onIncrement = { onStep(RuleField.NO_REPEAT, +1) }
                     )
                 }
-                if (editor.error != null) {
-                    OsdBanner(text = editor.error, tone = OsdTone.Error)
-                } else {
-                    HelpLine(stringResource(R.string.rule_editor_help))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                    NostalgiaButton(text = stringResource(R.string.save), onClick = onSave)
-                    NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
-                }
+                if (editor.error == null) HelpLine(stringResource(R.string.rule_editor_help))
             }
         }
     }
