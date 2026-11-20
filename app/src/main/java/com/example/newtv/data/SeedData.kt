@@ -1,5 +1,10 @@
 package com.example.newtv.data
 
+/**
+ * Demo content for a first run. The content IDs below are samples: they are placeholders chosen
+ * to show how a show is wired to a provider, not verified catalogue IDs, so the title pages they
+ * open may not exist. Replace them with real IDs in the show editor.
+ */
 object SeedData {
     suspend fun seed(database: AppDatabase) {
         val channels = listOf(
@@ -7,19 +12,25 @@ object SeedData {
                 id = "cartoons",
                 name = "Saturday Morning Cartoons",
                 ageRating = 7,
-                kidSafeOnly = true
+                kidSafeOnly = true,
+                number = 3,
+                accentColor = 0xFFFF4FD8
             ),
             ChannelEntity(
                 id = "classic_nick",
                 name = "Classic Nickelodeon",
                 ageRating = 10,
-                kidSafeOnly = false
+                kidSafeOnly = false,
+                number = 7,
+                accentColor = 0xFF33F6FF
             ),
             ChannelEntity(
                 id = "disney_after_school",
                 name = "Disney After School",
                 ageRating = 7,
-                kidSafeOnly = true
+                kidSafeOnly = true,
+                number = 11,
+                accentColor = 0xFF8CFF5E
             )
         )
 
@@ -28,8 +39,7 @@ object SeedData {
                 id = "spongebob",
                 title = "SpongeBob SquarePants",
                 provider = Provider.NETFLIX,
-                deepLinkPattern = "intent://www.netflix.com/watch/{contentId}" +
-                    "#Intent;scheme=https;package=com.netflix.ninja;end",
+                deepLinkPattern = Provider.NETFLIX.titleUrlTemplate,
                 contentId = "70155596",
                 seasonCount = 3,
                 episodeCount = 10,
@@ -39,8 +49,7 @@ object SeedData {
                 id = "kim_possible",
                 title = "Kim Possible",
                 provider = Provider.DISNEY,
-                deepLinkPattern = "intent://www.disneyplus.com/video/{contentId}" +
-                    "#Intent;scheme=https;package=com.disney.disneyplus;end",
+                deepLinkPattern = Provider.DISNEY.titleUrlTemplate,
                 contentId = "b2b6f5d3-63ab-49df-8d0f-9f1f0c0a1111",
                 seasonCount = 3,
                 episodeCount = 10,
@@ -50,8 +59,7 @@ object SeedData {
                 id = "duck_tales",
                 title = "DuckTales",
                 provider = Provider.DISNEY,
-                deepLinkPattern = "intent://www.disneyplus.com/video/{contentId}" +
-                    "#Intent;scheme=https;package=com.disney.disneyplus;end",
+                deepLinkPattern = Provider.DISNEY.titleUrlTemplate,
                 contentId = "2d6a2b34-693e-4b9c-9a76-2a2c2d0d2222",
                 seasonCount = 2,
                 episodeCount = 10,
@@ -61,8 +69,7 @@ object SeedData {
                 id = "hey_arnold",
                 title = "Hey Arnold!",
                 provider = Provider.NETFLIX,
-                deepLinkPattern = "intent://www.netflix.com/watch/{contentId}" +
-                    "#Intent;scheme=https;package=com.netflix.ninja;end",
+                deepLinkPattern = Provider.NETFLIX.titleUrlTemplate,
                 contentId = "80030435",
                 seasonCount = 2,
                 episodeCount = 10,

@@ -1,10 +1,132 @@
 <resources>
-    <string name="app_name">NewTV</string>
-    <string name="kid_safe_mode">Kid-safe mode</string>
-    <string name="enter_pin">Enter PIN to exit</string>
-    <string name="pin_hint">PIN</string>
+    <string name="app_name">NostalgiaTV</string>
+
+    <!-- Generic -->
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!-- Top bar -->
+    <string name="app_wordmark">NOSTALGIA TV</string>
+    <string name="kid_safe_badge">KID-SAFE</string>
+    <string name="channel_bug">CH %1$02d</string>
+    <string name="episode_code">S%1$dE%2$d</string>
+
+    <!-- Empty states -->
+    <string name="no_signal">NO SIGNAL</string>
+    <string name="no_signal_no_channels">No channels yet. Add one to start watching.</string>
+    <string name="no_signal_kid_safe">No channels are available in kid-safe mode. A parent can add one in the parent settings.</string>
+    <string name="no_signal_no_shows">This channel has no shows yet.</string>
+
+    <!-- Home -->
+    <string name="home_live_now">Live now</string>
+    <string name="home_coming_up">Coming up</string>
+    <string name="live_subtitle">%1$s • until %2$s</string>
+    <string name="enable_kid_safe">Enable kid-safe mode</string>
     <string name="exit_kid_safe">Exit kid-safe mode</string>
-    <string name="play_now">Play now</string>
+    <string name="add_channel">Add channel</string>
+    <string name="parent_settings">Parent settings</string>
+
+    <!-- Channel -->
+    <string name="channel_change_hint">CH ▲/▼ to change channel</string>
+    <string name="watch_now">Watch now</string>
+    <string name="guide">Guide</string>
+    <string name="minutes_left">%1$d min left</string>
+    <string name="provider_line">Provider: %1$s</string>
+    <string name="install_provider">Install %1$s</string>
+    <string name="edit_rules">Edit rules</string>
+    <string name="edit_channel">Edit channel</string>
     <string name="up_next">Up next</string>
-    <string name="schedule">Schedule</string>
+    <string name="program_time_range">%1$s – %2$s</string>
+    <string name="program_time_episode">%1$s • S%2$dE%3$d</string>
+    <string name="program_airs_at">%1$s (S%2$dE%3$d) airs at %4$s on CH %5$02d</string>
+    <string name="provider_unavailable">%1$s is not available. Install it to watch.</string>
+    <string name="link_title_page_hint">Opens the show page in %1$s — pick S%2$dE%3$d</string>
+    <string name="edit_lineup">Lineup</string>
+
+    <!-- Schedule -->
+    <string name="schedule_title">Guide</string>
+    <string name="listings">Listings</string>
+
+    <!-- Rule editor -->
+    <string name="rule_editor_title">Edit schedule rules</string>
+    <string name="rule_editor_help">Choose when this channel is on the air and how long each show runs.</string>
+    <string name="rule_start">Start time</string>
+    <string name="rule_end">End time</string>
+    <string name="rule_slot_length">Slot length</string>
+    <string name="rule_no_repeat">No-repeat window</string>
+    <string name="minutes_value">%1$d min</string>
+    <string name="airings_value">%1$d airings</string>
+    <string name="end_of_day_suffix">%1$s (end of day)</string>
+    <string name="error_rule_time_range">Start and end times must be within one day.</string>
+    <string name="error_rule_start_equals_end">Start and end times must differ.</string>
+    <string name="error_rule_slot_length">Slot length must be between 5 and 240 minutes.</string>
+    <string name="error_rule_no_repeat">No-repeat window must be between 1 and 50.</string>
+
+    <!-- Channel editor -->
+    <string name="channel_editor_add_title">Add channel</string>
+    <string name="channel_editor_edit_title">Edit channel</string>
+    <string name="channel_editor_help">Select a field to change it. Channel numbers are assigned automatically.</string>
+    <string name="kid_safe_only">Kid-safe only</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+    <string name="channel_name">Channel name</string>
+    <string name="channel_name_placeholder">Select to type a name</string>
+    <string name="channel_number">Channel number</string>
+    <string name="channel_number_value">CH %1$02d</string>
+    <string name="channel_number_auto">Assigned when saved</string>
+    <string name="age_rating">Age rating</string>
+    <string name="age_rating_value">%1$d+</string>
+    <string name="error_channel_name_required">Channel name is required.</string>
+    <string name="error_age_rating_range">Age rating must be 0–21.</string>
+
+    <string name="channel_show_count">Shows in lineup</string>
+
+    <!-- Lineup editor -->
+    <string name="lineup_editor_title">Channel lineup</string>
+    <string name="lineup_editor_help">Switch shows ON to put them on this channel. At least one is required.</string>
+    <string name="lineup_show_label">%1$s • %2$s • %3$d+</string>
+    <string name="lineup_empty_library">The show library is empty. Create a show to get started.</string>
+    <string name="new_show">New show</string>
+    <string name="edit_show">Edit</string>
+    <string name="error_lineup_empty">A channel needs at least one show. Switch one ON.</string>
+
+    <!-- Show editor -->
+    <string name="show_editor_add_title">New show</string>
+    <string name="show_editor_edit_title">Edit show</string>
+    <string name="show_editor_help">Content ID is the show\'s ID in the provider app. Links open the provider app only.</string>
+    <string name="show_title">Title</string>
+    <string name="show_title_placeholder">Select to type a title</string>
+    <string name="show_provider">Provider</string>
+    <string name="show_seasons">Seasons</string>
+    <string name="show_episodes_per_season">Episodes per season</string>
+    <string name="show_content_id">Content ID</string>
+    <string name="show_content_id_placeholder">Select to type the provider\'s ID</string>
+    <string name="show_link">Deep link</string>
+    <string name="link_choice_title_page">Show page</string>
+    <string name="link_choice_episode">Episode link</string>
+    <string name="link_choice_custom">Custom (kept)</string>
+    <string name="delete_show">Delete show</string>
+    <string name="delete_show_confirm">Press again to delete</string>
+    <string name="delete_show_warning">Delete this show? It is removed from every channel.</string>
+    <string name="error_show_title_required">Title is required.</string>
+    <string name="error_show_content_id_required">Content ID is required.</string>
+    <string name="error_show_seasons_range">Seasons must be 1–30.</string>
+    <string name="error_show_episodes_range">Episodes per season must be 1–60.</string>
+    <string name="error_show_delete_last">Can\'t delete: %1$s would be left with no shows.</string>
+
+    <!-- Parental lock -->
+    <string name="pin_window_title">Kid-safe setup</string>
+    <string name="pin_title">Parental lock</string>
+    <string name="pin_create_title">Set a parental PIN</string>
+    <string name="pin_create_message">Choose a %1$d–%2$d digit PIN. You\'ll need it to leave kid-safe mode.</string>
+    <string name="pin_confirm_title">Confirm PIN</string>
+    <string name="pin_confirm_message">Enter the same PIN again.</string>
+    <string name="pin_exit_message">Enter your PIN to exit kid-safe mode.</string>
+    <string name="pin_parent_message">Enter your PIN to open parent settings.</string>
+    <string name="error_pin_length">PIN must be %1$d–%2$d digits.</string>
+    <string name="error_pin_mismatch">PINs don\'t match. Start again.</string>
+    <string name="error_pin_incorrect">Incorrect PIN. %1$d attempt(s) left.</string>
+    <string name="error_pin_locked">Too many attempts. Try again in %1$d s.</string>
 </resources>

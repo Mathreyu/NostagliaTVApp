@@ -14,8 +14,7 @@ class ContentResolver(private val context: Context) : DeepLinkResolver {
         if (!isProviderAvailable(show.provider)) {
             return null
         }
-        return DeepLinkTemplate(show.deepLinkPattern)
-            .render(show.contentId, season, episode)
+        return LinkSelector.select(show, season, episode).url
     }
 
     fun resolveIntent(show: ShowEntity, season: Int, episode: Int): Intent? {
@@ -46,6 +45,8 @@ class ContentResolver(private val context: Context) : DeepLinkResolver {
     }
 
     fun isProviderAvailable(provider: Provider): Boolean {
-        return packageManager.getLaunchIntentForPackage(provider.packageName) != null
+        val pkg = provider.packageName
+        return packageManager.getLeanbackLaunchIntentForPackage(pkg) != null ||
+            packageManager.getLaunchIntentForPackage(pkg) != null
     }
 }

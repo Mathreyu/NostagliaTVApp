@@ -10,65 +10,110 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.example.newtv.ui.NewTvTheme
+import com.example.newtv.ui.NostalgiaColors
+import com.example.newtv.ui.NostalgiaShapes
+import com.example.newtv.ui.osdTextStyle
 
+/** Room around scrolling content for the focus scale and glow of edge items. */
+private val FocusBleed = 12.dp
+private val Bezel = Color(0xFF1C2038)
+private val BezelEdge = Color(0xFF3A4066)
+
+/**
+ * TV-frame container: a chunky bezel around a dark "screen" with an OSD title bar
+ * (title in phosphor green, a power LED on the right).
+ */
 @Composable
 fun NostalgiaWindow(
     title: String,
     modifier: Modifier = Modifier,
+    contentSpacing: Dp = 16.dp,
+    /** Scroll the content (never the footer) when the window is taller than the screen. */
+    scrollable: Boolean = false,
+    /** Pinned below the (scrolling) content, e.g. the Save / Cancel row, so it never leaves the screen. */
+    footer: (@Composable ColumnScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val borderColor = MaterialTheme.colorScheme.primary
-    val shape = MaterialTheme.shapes.medium
+    val outer = NostalgiaShapes.Large
+    val scroll = rememberScrollState()
     Column(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surface, shape)
-            .border(2.dp, borderColor, shape)
-            .padding(12.dp),
+            .background(Bezel, outer)
+            .border(2.dp, BezelEdge, outer)
+            .padding(8.dp)
+            .background(NostalgiaColors.Surface, NostalgiaShapes.Medium)
+            .border(2.dp, NostalgiaColors.GuideLine, NostalgiaShapes.Medium)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            WindowDot(color = MaterialTheme.colorScheme.tertiary)
-            WindowDot(color = MaterialTheme.colorScheme.secondary)
-            WindowDot(color = MaterialTheme.colorScheme.primary)
-            Text(
-                text = title.uppercase(),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    letterSpacing = 1.2.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            Text(text = title.uppercase(), style = osdTextStyle(32), modifier = Modifier.weight(1f))
+            Box(
+                Modifier
+                    .size(10.dp)
+                    .background(NostalgiaColors.Error, CircleShape)
             )
+            Box(Modifier.width(2.dp))
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(3.dp)
-                .background(MaterialTheme.colorScheme.primary)
+                .height(2.dp)
+                .background(NostalgiaColors.GuideLine)
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .then(
+                    if (scrollable) {
+                        Modifier
+                            .bleed(FocusBleed)
+                            .scrollEdgeFades({ scroll.canScrollBackward }, { scroll.canScrollForward })
+                            .verticalScroll(scroll)
+                            .padding(horizontal = FocusBleed, vertical = 6.dp)
+                    } else {
+                        Modifier
+                    }
+                ),
+            verticalArrangement = Arrangement.spacedBy(contentSpacing),
             content = content
         )
+        if (footer != null) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(contentSpacing),
+                content = footer
+            )
+        }
     }
 }
 
+@Preview(widthDp = 960, heightDp = 540)
 @Composable
-private fun WindowDot(color: Color) {
-    Box(
-        modifier = Modifier
-            .height(14.dp)
-            .background(color, MaterialTheme.shapes.small)
-            .border(1.dp, MaterialTheme.colorScheme.onBackground, MaterialTheme.shapes.small)
-            .padding(6.dp)
-    )
+private fun WindowPreview() {
+    NewTvTheme {
+        Box(Modifier.background(NostalgiaColors.Background).padding(48.dp)) {
+            NostalgiaWindow(title = "Channel setup") {
+                Text("Pick a channel to edit")
+                NostalgiaButton(text = "Back", onClick = {}, secondary = true)
+            }
+        }
+    }
 }
