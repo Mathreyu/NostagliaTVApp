@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -34,6 +35,7 @@ import androidx.tv.material3.Glow
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.example.newtv.R
 import com.example.newtv.ui.NewTvTheme
 import com.example.newtv.ui.NostalgiaColors
 import com.example.newtv.ui.NostalgiaFocus
@@ -99,7 +101,7 @@ fun ParentalLockPad(
             Box(Modifier.height(44.dp), contentAlignment = Alignment.CenterStart) {
                 if (error != null) OsdBanner(text = error, tone = OsdTone.Error)
             }
-            NostalgiaButton(text = "Cancel", onClick = onCancel, secondary = true)
+            NostalgiaButton(text = stringResource(R.string.cancel), onClick = onCancel, secondary = true)
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val rows = listOf(

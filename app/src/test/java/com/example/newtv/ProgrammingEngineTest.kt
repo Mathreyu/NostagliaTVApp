@@ -250,6 +250,48 @@ class ProgrammingEngineTest {
         }
     }
 
+    @Test
+    fun maxShowRatingExcludesOlderShowsEverywhere() = runTest {
+        val shows = listOf(
+            show("a").copy(ageRating = 7),
+            show("b").copy(ageRating = 14),
+            show("c").copy(ageRating = 3)
+        )
+        val e = engine(shows, listOf(rule("r", 0, 1440, 30)))
+        val from = t("2025-01-01T00:00:00Z")
+        val unfiltered = scheduleFrom(e, from, 48).map { it.show.id }.toSet()
+        assertEquals(setOf("a", "b", "c"), unfiltered)
+
+        var cursor = from
+        repeat(48) {
+            val p = e.getProgramAt(channel.id, cursor, maxShowRating = 7)!!
+            assertTrue(p.show.ageRating <= 7)
+            cursor = p.endTime
+        }
+        assertTrue(e.getNextProgram(channel.id, from, maxShowRating = 7)!!.show.ageRating <= 7)
+        assertTrue(e.getSchedulePreview(channel.id, from, 10, maxShowRating = 7).all { it.show.ageRating <= 7 })
+        assertTrue(e.getProgramNow(channel.id, from, maxShowRating = 7)!!.show.ageRating <= 7)
+        assertTrue(e.getNowPlaying(null, from, maxShowRating = 7)[channel.id]!!.show.ageRating <= 7)
+    }
+
+    @Test
+    fun maxShowRatingWithNoAllowedShowsYieldsNothing() = runTest {
+        val e = engine(listOf(show("a").copy(ageRating = 16)), listOf(rule("r", 0, 1440, 30)))
+        val now = t("2025-01-01T10:00:00Z")
+        assertNull(e.getProgramNow(channel.id, now, maxShowRating = 7))
+        assertNull(e.getNextProgram(channel.id, now, maxShowRating = 7))
+        assertTrue(e.getSchedulePreview(channel.id, now, maxShowRating = 7).isEmpty())
+        assertTrue(e.getNowPlaying(null, now, maxShowRating = 7).isEmpty())
+        assertNotNull(e.getProgramNow(channel.id, now))
+    }
+
+    @Test
+    fun nullMaxShowRatingChangesNothing() = runTest {
+        val e = engine(listOf(show("a").copy(ageRating = 16), show("b")), listOf(rule("r", 0, 1440, 30)))
+        val now = t("2025-01-01T10:10:00Z")
+        assertEquals(e.getProgramNow(channel.id, now), e.getProgramNow(channel.id, now, null))
+    }
+
     private suspend fun scheduleFrom(e: ProgrammingEngine, from: Instant, count: Int): List<Program> {
         val list = ArrayList<Program>()
         var cursor = from

@@ -1,10 +1,82 @@
 <resources>
     <string name="app_name">NostalgiaTV</string>
-    <string name="kid_safe_mode">Kid-safe mode</string>
-    <string name="enter_pin">Enter PIN to exit</string>
-    <string name="pin_hint">PIN</string>
+
+    <!-- Generic -->
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!-- Home -->
+    <string name="home_title">Home</string>
+    <string name="home_featured">Featured</string>
+    <string name="home_channels">Channels</string>
+    <string name="home_on_now">On now</string>
+    <string name="home_tune_in">Tune in</string>
+    <string name="enable_kid_safe">Enable kid-safe mode</string>
     <string name="exit_kid_safe">Exit kid-safe mode</string>
+    <string name="add_channel">Add channel</string>
+    <string name="parent_settings">Parent settings</string>
+
+    <!-- Channel -->
+    <string name="channel_title">Now Playing</string>
+    <string name="channel_heading">CH %1$02d  %2$s</string>
+    <string name="no_program">No program available</string>
+    <string name="provider_line">Provider: %1$s</string>
+    <string name="install_provider">Install %1$s</string>
     <string name="play_now">Play now</string>
-    <string name="up_next">Up next</string>
     <string name="schedule">Schedule</string>
+    <string name="edit_rules">Edit rules</string>
+    <string name="edit_channel">Edit channel</string>
+    <string name="up_next">Up next</string>
+    <string name="program_time_range">%1$s – %2$s</string>
+    <string name="program_title_episode">%1$s • S%2$dE%3$d</string>
+    <string name="program_time_episode">%1$s • S%2$dE%3$d</string>
+    <string name="program_airs_at">%1$s (S%2$dE%3$d) airs at %4$s on CH %5$02d</string>
+    <string name="provider_unavailable">%1$s is not available. Install it to watch.</string>
+
+    <!-- Schedule -->
+    <string name="schedule_title">Schedule</string>
+
+    <!-- Rule editor -->
+    <string name="rule_editor_title">Edit schedule rules</string>
+    <string name="rule_start">Start time</string>
+    <string name="rule_end">End time</string>
+    <string name="rule_slot_length">Slot length</string>
+    <string name="rule_no_repeat">No-repeat window</string>
+    <string name="minutes_value">%1$d min</string>
+    <string name="airings_value">%1$d airings</string>
+    <string name="end_of_day_suffix">%1$s (end of day)</string>
+    <string name="error_rule_time_range">Start and end times must be within one day.</string>
+    <string name="error_rule_start_equals_end">Start and end times must differ.</string>
+    <string name="error_rule_slot_length">Slot length must be between 5 and 240 minutes.</string>
+    <string name="error_rule_no_repeat">No-repeat window must be between 1 and 50.</string>
+
+    <!-- Channel editor -->
+    <string name="channel_editor_add_title">Add channel</string>
+    <string name="channel_editor_edit_title">Edit channel</string>
+    <string name="channel_name">Channel name</string>
+    <string name="channel_name_placeholder">Select to type a name</string>
+    <string name="channel_number">Channel number</string>
+    <string name="channel_number_value">CH %1$02d</string>
+    <string name="channel_number_auto">Assigned when saved</string>
+    <string name="age_rating">Age rating</string>
+    <string name="age_rating_value">%1$d+</string>
+    <string name="kid_safe_only_on">Kid-safe only: ON</string>
+    <string name="kid_safe_only_off">Kid-safe only: OFF</string>
+    <string name="error_channel_name_required">Channel name is required.</string>
+    <string name="error_age_rating_range">Age rating must be 0–21.</string>
+
+    <!-- Parental lock -->
+    <string name="pin_title">Parental lock</string>
+    <string name="pin_create_title">Set a parental PIN</string>
+    <string name="pin_create_message">Choose a %1$d–%2$d digit PIN. You\'ll need it to leave kid-safe mode.</string>
+    <string name="pin_confirm_title">Confirm PIN</string>
+    <string name="pin_confirm_message">Enter the same PIN again.</string>
+    <string name="pin_exit_message">Enter your PIN to exit kid-safe mode.</string>
+    <string name="pin_parent_message">Enter your PIN to open parent settings.</string>
+    <string name="error_pin_length">PIN must be %1$d–%2$d digits.</string>
+    <string name="error_pin_mismatch">PINs don\'t match. Start again.</string>
+    <string name="error_pin_incorrect">Incorrect PIN. %1$d attempt(s) left.</string>
+    <string name="error_pin_locked">Too many attempts. Try again in %1$d s.</string>
 </resources>

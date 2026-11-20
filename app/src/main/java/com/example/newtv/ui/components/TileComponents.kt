@@ -24,8 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.example.newtv.ui.ChannelAccents
 import com.example.newtv.ui.NewTvTheme
@@ -49,14 +51,15 @@ fun TileCard(
     onClick: () -> Unit,
     width: Dp,
     height: Dp,
-    accentSeed: String
+    accentSeed: String,
+    modifier: Modifier = Modifier
 ) {
     val accent = accentColor(accentSeed)
     val shape = NostalgiaShapes.Medium
     val focusBorder = Border(BorderStroke(NostalgiaFocus.BorderWidth, NostalgiaColors.Focus), 0.dp, shape)
     Card(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .width(width)
             .height(height),
         shape = CardDefaults.shape(shape),
@@ -105,42 +108,74 @@ fun TileCard(
     }
 }
 
+/** List row. When [onClick] is given the row is focusable and selectable (D-pad scrolls lists). */
 @Composable
 fun TileRow(
     title: String,
     subtitle: String,
-    accentSeed: String
+    accentSeed: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val accent = accentColor(accentSeed)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(NostalgiaColors.Surface, NostalgiaShapes.Medium)
-            .border(2.dp, accent.copy(alpha = 0.55f), NostalgiaShapes.Medium)
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
+    val shape = NostalgiaShapes.Medium
+    val content: @Composable () -> Unit = {
+        Row(
             modifier = Modifier
-                .height(64.dp)
-                .width(96.dp)
-                .background(accent.copy(alpha = 0.30f), NostalgiaShapes.Small)
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(64.dp)
+                    .width(96.dp)
+                    .background(accent.copy(alpha = 0.30f), NostalgiaShapes.Small)
             )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = NostalgiaColors.TextMuted
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = NostalgiaColors.TextMuted
+                )
+            }
         }
+    }
+    if (onClick == null) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(NostalgiaColors.Surface, shape)
+                .border(2.dp, accent.copy(alpha = 0.55f), shape)
+        ) { content() }
+    } else {
+        Surface(
+            onClick = onClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = ClickableSurfaceDefaults.shape(shape),
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = NostalgiaColors.Surface,
+                focusedContainerColor = NostalgiaColors.SurfaceRaised,
+                contentColor = NostalgiaColors.TextPrimary,
+                focusedContentColor = NostalgiaColors.TextPrimary
+            ),
+            scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
+            border = ClickableSurfaceDefaults.border(
+                border = Border(BorderStroke(2.dp, accent.copy(alpha = 0.55f)), 0.dp, shape),
+                focusedBorder = Border(BorderStroke(NostalgiaFocus.BorderWidth, NostalgiaColors.Focus), 0.dp, shape)
+            ),
+            glow = ClickableSurfaceDefaults.glow(
+                focusedGlow = Glow(NostalgiaFocus.GlowColor, NostalgiaFocus.GlowElevation)
+            )
+        ) { content() }
     }
 }
 

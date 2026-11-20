@@ -55,12 +55,22 @@ class ProgrammingEngine(
 ) {
     suspend fun getProgramNow(
         channelId: String,
-        now: Instant = Instant.now()
-    ): Program? = getProgramAt(channelId, now)
+        now: Instant = Instant.now(),
+        maxShowRating: Int? = null
+    ): Program? = getProgramAt(channelId, now, maxShowRating)
 
-    suspend fun getProgramAt(channelId: String, instant: Instant): Program? {
+    /**
+     * All program lookups take an optional [maxShowRating]: shows whose age rating is higher are
+     * excluded from the channel's rotation (kid-safe mode). A channel left with no shows has no
+     * programs.
+     */
+    suspend fun getProgramAt(
+        channelId: String,
+        instant: Instant,
+        maxShowRating: Int? = null
+    ): Program? {
         val channel = repository.getChannel(channelId) ?: return null
-        val shows = repository.getShows(channelId)
+        val shows = loadShows(channelId, maxShowRating)
         val rules = repository.getRules(channelId)
         return computeProgram(channel, shows, rules, instant)
     }
@@ -68,10 +78,11 @@ class ProgrammingEngine(
     /** The program starting at the current program's end time. */
     suspend fun getNextProgram(
         channelId: String,
-        now: Instant = Instant.now()
+        now: Instant = Instant.now(),
+        maxShowRating: Int? = null
     ): Program? {
         val channel = repository.getChannel(channelId) ?: return null
-        val shows = repository.getShows(channelId)
+        val shows = loadShows(channelId, maxShowRating)
         val rules = repository.getRules(channelId)
         val current = computeProgram(channel, shows, rules, now) ?: return null
         return computeProgram(channel, shows, rules, current.endTime)
@@ -81,10 +92,11 @@ class ProgrammingEngine(
     suspend fun getSchedulePreview(
         channelId: String,
         now: Instant = Instant.now(),
-        count: Int = 5
+        count: Int = 5,
+        maxShowRating: Int? = null
     ): List<Program> {
         val channel = repository.getChannel(channelId) ?: return emptyList()
-        val shows = repository.getShows(channelId)
+        val shows = loadShows(channelId, maxShowRating)
         val rules = repository.getRules(channelId)
         var cursor = computeProgram(channel, shows, rules, now)?.endTime ?: return emptyList()
         val result = ArrayList<Program>(count)
@@ -99,12 +111,13 @@ class ProgrammingEngine(
     /** Current program of each given channel (all channels when null), keyed by channel id. */
     suspend fun getNowPlaying(
         channelIds: Collection<String>? = null,
-        now: Instant = Instant.now()
+        now: Instant = Instant.now(),
+        maxShowRating: Int? = null
     ): Map<String, Program> {
         val ids = channelIds ?: repository.getChannels().map { it.id }
         val result = LinkedHashMap<String, Program>()
         for (id in ids) {
-            getProgramNow(id, now)?.let { result[id] = it }
+            getProgramNow(id, now, maxShowRating)?.let { result[id] = it }
         }
         return result
     }
@@ -120,6 +133,11 @@ class ProgrammingEngine(
                 playedAt = Instant.now().toEpochMilli()
             )
         )
+    }
+
+    private suspend fun loadShows(channelId: String, maxShowRating: Int?): List<ShowEntity> {
+        val shows = repository.getShows(channelId)
+        return if (maxShowRating == null) shows else shows.filter { it.ageRating <= maxShowRating }
     }
 
     // ---- pure computation ----
