@@ -10,7 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.MaterialTheme
+import com.example.newtv.ui.NostalgiaColors
+import com.example.newtv.ui.NostalgiaShapes
 
 @Composable
 fun NostalgiaPanel(
@@ -21,8 +22,8 @@ fun NostalgiaPanel(
         modifier = Modifier
             .fillMaxWidth()
             .height(height)
-            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-            .border(2.dp, MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
+            .background(NostalgiaColors.GuideBlueDeep, NostalgiaShapes.Medium)
+            .border(2.dp, NostalgiaColors.GuideLine, NostalgiaShapes.Medium)
             .padding(12.dp)
     ) {
         content()

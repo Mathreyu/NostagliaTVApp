@@ -1,5 +1,6 @@
 package com.example.newtv.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -16,25 +17,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.BorderStroke
 import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
+import androidx.tv.material3.Glow
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.example.newtv.ui.ChannelAccents
+import com.example.newtv.ui.NewTvTheme
+import com.example.newtv.ui.NostalgiaColors
+import com.example.newtv.ui.NostalgiaFocus
+import com.example.newtv.ui.NostalgiaShapes
+import com.example.newtv.ui.osdTextStyle
 
 @Composable
 fun SectionTitle(title: String) {
     Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+        text = title.uppercase(),
+        style = osdTextStyle(30)
     )
 }
 
@@ -48,20 +52,26 @@ fun TileCard(
     accentSeed: String
 ) {
     val accent = accentColor(accentSeed)
-    val shape = MaterialTheme.shapes.medium
+    val shape = NostalgiaShapes.Medium
+    val focusBorder = Border(BorderStroke(NostalgiaFocus.BorderWidth, NostalgiaColors.Focus), 0.dp, shape)
     Card(
         onClick = onClick,
         modifier = Modifier
             .width(width)
-            .height(height)
-            .clip(shape),
+            .height(height),
+        shape = CardDefaults.shape(shape),
+        scale = CardDefaults.scale(focusedScale = 1.05f),
+        glow = CardDefaults.glow(
+            focusedGlow = Glow(NostalgiaFocus.GlowColor, NostalgiaFocus.GlowElevation)
+        ),
         border = CardDefaults.border(
-            Border(BorderStroke(2.dp, accent), 0.dp, shape),
-            Border(BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary), 4.dp, shape),
-            Border(BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary), 4.dp, shape)
+            border = Border(BorderStroke(2.dp, accent.copy(alpha = 0.55f)), 0.dp, shape),
+            focusedBorder = focusBorder,
+            pressedBorder = focusBorder
         ),
         colors = CardDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = NostalgiaColors.Surface,
+            focusedContainerColor = NostalgiaColors.SurfaceRaised
         )
     ) {
         Column(
@@ -70,7 +80,7 @@ fun TileCard(
                 .clip(shape)
                 .background(
                     Brush.horizontalGradient(
-                        listOf(accent.copy(alpha = 0.35f), Color.Transparent)
+                        listOf(accent.copy(alpha = 0.30f), Color.Transparent)
                     )
                 )
                 .padding(14.dp),
@@ -88,7 +98,7 @@ fun TileCard(
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                color = NostalgiaColors.TextMuted,
                 modifier = Modifier.padding(8.dp)
             )
         }
@@ -105,8 +115,8 @@ fun TileRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-            .border(2.dp, accent, MaterialTheme.shapes.medium)
+            .background(NostalgiaColors.Surface, NostalgiaShapes.Medium)
+            .border(2.dp, accent.copy(alpha = 0.55f), NostalgiaShapes.Medium)
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -114,7 +124,7 @@ fun TileRow(
             modifier = Modifier
                 .height(64.dp)
                 .width(96.dp)
-                .background(accent.copy(alpha = 0.35f), MaterialTheme.shapes.small)
+                .background(accent.copy(alpha = 0.30f), NostalgiaShapes.Small)
         )
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
@@ -128,19 +138,32 @@ fun TileRow(
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                color = NostalgiaColors.TextMuted
             )
         }
     }
 }
 
-private fun accentColor(seed: String): Color {
-    val colors = listOf(
-        Color(0xFFFF4FD8),
-        Color(0xFF33F6FF),
-        Color(0xFFFFE66D),
-        Color(0xFF8CFF5E)
-    )
-    val index = (seed.hashCode() and Int.MAX_VALUE) % colors.size
-    return colors[index]
+/** Stable accent for a string seed, always from [ChannelAccents]. */
+internal fun accentColor(seed: String): Color {
+    val index = (seed.hashCode() and Int.MAX_VALUE) % ChannelAccents.size
+    return ChannelAccents[index]
+}
+
+@Preview(widthDp = 960, heightDp = 540)
+@Composable
+private fun TilePreview() {
+    NewTvTheme {
+        Column(
+            Modifier.background(NostalgiaColors.Background).padding(48.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            SectionTitle("Featured")
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                TileCard("Saturday Cartoons", "Ch 03", {}, 240.dp, 120.dp, "a")
+                TileCard("After School", "Ch 05", {}, 240.dp, 120.dp, "b")
+            }
+            TileRow("Late Night", "Ch 09", "c")
+        }
+    }
 }
