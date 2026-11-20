@@ -14,6 +14,9 @@ import com.example.newtv.engine.Program
 import com.example.newtv.engine.ProgrammingEngine
 import com.example.newtv.playback.PlaybackOrchestrator
 import com.example.newtv.resolver.ContentResolver
+import com.example.newtv.security.KidSafePinManager
+import com.example.newtv.security.KidSafePrefs
+import com.example.newtv.security.PinCheck
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class MainUiState(
     val screen: Screen = Screen.Home,
@@ -31,7 +35,16 @@ data class MainUiState(
     val providerAvailable: Boolean? = null,
     val message: String? = null,
     val ruleEditor: RuleEditorState? = null,
-    val channelEditor: ChannelEditorState? = null
+    val channelEditor: ChannelEditorState? = null,
+    val pinDialog: PinDialogState? = null
+)
+
+enum class PinDialogMode { CREATE, VERIFY }
+
+data class PinDialogState(
+    val mode: PinDialogMode,
+    val error: String? = null,
+    val busy: Boolean = false
 )
 
 sealed class Screen {
@@ -65,9 +78,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val resolver = ContentResolver(application)
     private val engine = ProgrammingEngine(repository, resolver)
     private val orchestrator = PlaybackOrchestrator(application)
-    private val kidSafePin = "1234"
+    private val kidSafePrefs = KidSafePrefs(application)
+    private val pinManager = KidSafePinManager(kidSafePrefs)
 
-    private val _uiState = MutableStateFlow(MainUiState())
+    private val _uiState = MutableStateFlow(MainUiState(kidSafeEnabled = kidSafePrefs.kidSafeEnabled))
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
     private var allChannels: List<ChannelEntity> = emptyList()
 
@@ -261,18 +275,82 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(screen = Screen.Home) }
     }
 
-    fun enableKidSafe() {
-        _uiState.update { it.copy(kidSafeEnabled = true) }
-        updateChannelList()
+    /** Enables kid-safe mode, asking the parent to create a PIN first if none exists. */
+    fun requestEnableKidSafe() {
+        if (pinManager.hasPin()) {
+            setKidSafe(true)
+        } else {
+            _uiState.update { it.copy(pinDialog = PinDialogState(PinDialogMode.CREATE)) }
+        }
     }
 
-    fun disableKidSafe(pin: String): Boolean {
-        val allowed = pin == kidSafePin
-        if (allowed) {
-            _uiState.update { it.copy(kidSafeEnabled = false) }
-            updateChannelList()
+    fun requestExitKidSafe() {
+        _uiState.update { it.copy(pinDialog = PinDialogState(PinDialogMode.VERIFY)) }
+    }
+
+    fun dismissPinDialog() {
+        if (_uiState.value.pinDialog?.busy == true) return
+        _uiState.update { it.copy(pinDialog = null) }
+    }
+
+    fun submitPin(pin: String, confirmation: String) {
+        val dialog = _uiState.value.pinDialog ?: return
+        if (dialog.busy) return
+        when (dialog.mode) {
+            PinDialogMode.CREATE -> createPin(pin, confirmation)
+            PinDialogMode.VERIFY -> verifyPin(pin)
         }
-        return allowed
+    }
+
+    private fun createPin(pin: String, confirmation: String) {
+        val error = when {
+            !KidSafePinManager.isValidPin(pin) ->
+                "PIN must be ${KidSafePinManager.MIN_LENGTH}–${KidSafePinManager.MAX_LENGTH} digits."
+            pin != confirmation -> "PINs don't match."
+            else -> null
+        }
+        if (error != null) {
+            setPinDialogError(error)
+            return
+        }
+        setPinDialogBusy()
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) { pinManager.setPin(pin) }
+            _uiState.update { it.copy(pinDialog = null) }
+            setKidSafe(true)
+        }
+    }
+
+    private fun verifyPin(pin: String) {
+        setPinDialogBusy()
+        viewModelScope.launch {
+            when (val result = withContext(Dispatchers.Default) { pinManager.verify(pin) }) {
+                PinCheck.Success, PinCheck.NoPinSet -> {
+                    _uiState.update { it.copy(pinDialog = null) }
+                    setKidSafe(false)
+                }
+                is PinCheck.Incorrect -> setPinDialogError(
+                    "Incorrect PIN. ${result.attemptsLeft} attempt(s) left."
+                )
+                is PinCheck.LockedOut -> setPinDialogError(
+                    "Too many attempts. Try again in ${(result.retryInMillis + 999) / 1000} s."
+                )
+            }
+        }
+    }
+
+    private fun setPinDialogBusy() {
+        _uiState.update { it.copy(pinDialog = it.pinDialog?.copy(busy = true, error = null)) }
+    }
+
+    private fun setPinDialogError(message: String) {
+        _uiState.update { it.copy(pinDialog = it.pinDialog?.copy(busy = false, error = message)) }
+    }
+
+    private fun setKidSafe(enabled: Boolean) {
+        kidSafePrefs.kidSafeEnabled = enabled
+        _uiState.update { it.copy(kidSafeEnabled = enabled) }
+        updateChannelList()
     }
 
     fun playNow(activity: Activity, channelId: String) {
