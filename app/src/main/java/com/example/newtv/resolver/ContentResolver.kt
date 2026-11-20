@@ -46,6 +46,8 @@ class ContentResolver(private val context: Context) : DeepLinkResolver {
     }
 
     fun isProviderAvailable(provider: Provider): Boolean {
-        return packageManager.getLaunchIntentForPackage(provider.packageName) != null
+        val pkg = provider.packageName
+        return packageManager.getLeanbackLaunchIntentForPackage(pkg) != null ||
+            packageManager.getLaunchIntentForPackage(pkg) != null
     }
 }

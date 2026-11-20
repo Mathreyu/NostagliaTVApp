@@ -1,4 +1,4 @@
-# NostalgiaTVApp
+# NostalgiaTV
 
 A Google TV app that creates virtual channels with scheduled-style programming and launches content via deep links to streaming providers.
 
@@ -28,10 +28,11 @@ A Google TV app that creates virtual channels with scheduled-style programming a
 
 ## Build
 
-Set Java 17 and build:
+Requires JDK 17 (the Gradle toolchain is set to 17).
 
 ```
-./gradlew assembleDebug
+./gradlew assembleDebug            # build the debug APK
+./gradlew testDebugUnitTest        # run the unit tests
 ```
 
 ## Notes

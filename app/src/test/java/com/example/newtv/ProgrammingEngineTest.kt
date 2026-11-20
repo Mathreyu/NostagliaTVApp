@@ -49,6 +49,7 @@ class ProgrammingEngineTest {
                 startMinute = 0,
                 endMinute = 1440,
                 noRepeatWindow = 2,
+                slotMinutes = 30,
                 rotationMode = RotationMode.ROUND_ROBIN
             )
         )
@@ -78,7 +79,7 @@ class ProgrammingEngineTest {
     ) : TvRepository(null) {
         private var channelState: ChannelStateEntity? = null
         private val episodeState = mutableMapOf<String, EpisodeStateEntity>()
-        private val recent = mutableListOf<RecentEpisodeEntity>()
+        private val recentList = mutableListOf<RecentEpisodeEntity>()
 
         override suspend fun getChannel(channelId: String): ChannelEntity? = channel
 
@@ -98,15 +99,15 @@ class ProgrammingEngineTest {
             episodeState[state.showId] = state
         }
 
-        override suspend fun addRecentEpisode(recentEpisode: RecentEpisodeEntity) {
-            recent.add(recentEpisode)
+        override suspend fun addRecentEpisode(recent: RecentEpisodeEntity) {
+            recentList.add(recent)
         }
 
         override suspend fun getRecentEpisodes(
             channelId: String,
             limit: Int
         ): List<RecentEpisodeEntity> {
-            return recent.takeLast(limit).reversed()
+            return recentList.takeLast(limit).reversed()
         }
     }
 }

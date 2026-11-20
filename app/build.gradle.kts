@@ -10,7 +10,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.newtv"
+        applicationId = "io.github.mathreyu.nostalgiatv"
         minSdk = 31
         targetSdk = 34
         versionCode = 1
@@ -42,7 +42,7 @@ kotlin {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
+    val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
     implementation(composeBom)
 
     implementation("androidx.core:core-ktx:1.17.0")
@@ -56,7 +56,6 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
     implementation("androidx.tv:tv-material:1.0.1")
-    implementation("androidx.tv:tv-foundation:1.0.0-alpha12")
 
     implementation("androidx.room:room-runtime:2.8.4")
     implementation("androidx.room:room-ktx:2.8.4")

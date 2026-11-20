@@ -1,6 +1,5 @@
 package com.example.newtv.ui.components
 
-import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -18,6 +17,7 @@ fun NostalgiaButton(
 ) {
     Button(
         onClick = onClick,
+        modifier = modifier,
         colors = ButtonDefaults.colors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,

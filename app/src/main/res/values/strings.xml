@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NewTV</string>
+    <string name="app_name">NostalgiaTV</string>
     <string name="kid_safe_mode">Kid-safe mode</string>
     <string name="enter_pin">Enter PIN to exit</string>
     <string name="pin_hint">PIN</string>
