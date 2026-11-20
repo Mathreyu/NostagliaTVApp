@@ -1,5 +1,6 @@
 package com.example.newtv.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -8,7 +9,11 @@ data class ChannelEntity(
     @PrimaryKey val id: String,
     val name: String,
     val ageRating: Int,
-    val kidSafeOnly: Boolean
+    val kidSafeOnly: Boolean,
+    /** Channel number shown in the UI. */
+    @ColumnInfo(defaultValue = "0") val number: Int = 0,
+    /** ARGB accent colour. */
+    @ColumnInfo(defaultValue = "4281595647") val accentColor: Long = ChannelPalette.DEFAULT
 )
 
 @Entity(tableName = "shows")
@@ -38,21 +43,6 @@ data class ScheduleRuleEntity(
     val noRepeatWindow: Int,
     val slotMinutes: Int,
     val rotationMode: RotationMode
-)
-
-@Entity(tableName = "channel_state")
-data class ChannelStateEntity(
-    @PrimaryKey val channelId: String,
-    val lastShowId: String?,
-    val lastUpdatedAt: Long
-)
-
-@Entity(tableName = "episode_state")
-data class EpisodeStateEntity(
-    @PrimaryKey val showId: String,
-    val lastSeason: Int,
-    val lastEpisode: Int,
-    val lastPlayedAt: Long
 )
 
 @Entity(tableName = "recent_episodes")
