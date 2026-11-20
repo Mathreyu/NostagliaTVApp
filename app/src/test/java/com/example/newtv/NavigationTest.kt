@@ -81,3 +81,27 @@ class NavigationTest {
         assertEquals("a", ChannelNavigation.adjacent(listOf(ch("a", 1)), "a", +1)!!.id)
     }
 }
+
+class NavigationEditorsTest {
+    @Test
+    fun lineupAndShowEditorsAreEditors() {
+        assertTrue(Screen.LineupEditor("a").isEditor)
+        assertTrue(Screen.ShowEditor(null).isEditor)
+        assertTrue(Screen.ShowEditor("x").isEditor)
+        assertEquals("a", Screen.LineupEditor("a").ownerChannelId)
+        assertNull(Screen.ShowEditor("x").ownerChannelId)
+    }
+
+    @Test
+    fun pruneEditorsDropsLineupAndShowEditor() {
+        val stack = listOf(Screen.Home, Screen.Channel("a"), Screen.LineupEditor("a"), Screen.ShowEditor(null))
+        assertEquals(listOf(Screen.Home, Screen.Channel("a")), BackStack.pruneEditors(stack))
+    }
+
+    @Test
+    fun pruneChannelsCutsLineupOfHiddenChannel() {
+        val stack = listOf(Screen.Home, Screen.Channel("a"), Screen.LineupEditor("a"), Screen.ShowEditor(null))
+        assertEquals(listOf(Screen.Home), BackStack.pruneChannels(stack, emptySet()))
+        assertEquals(stack, BackStack.pruneChannels(stack, setOf("a")))
+    }
+}

@@ -51,6 +51,8 @@ data class MainUiState(
     val message: String? = null,
     val ruleEditor: RuleEditorState? = null,
     val channelEditor: ChannelEditorState? = null,
+    val lineupEditor: LineupEditorState? = null,
+    val showEditor: ShowEditorState? = null,
     val pinDialog: PinDialogState? = null,
     /** True while a parent has unlocked editing (PIN verified) during kid-safe mode. */
     val editingUnlocked: Boolean = false,
@@ -77,6 +79,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch(Dispatchers.IO) {
             repository.seedIfEmpty()
+            repository.pruneHistory(System.currentTimeMillis())
         }
         viewModelScope.launch {
             repository.observeChannels().collectLatest { channels ->
@@ -198,6 +201,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun openChannelEditorInternal(channelId: String?, unlock: Boolean) {
         viewModelScope.launch {
             val channel = channelId?.let { repository.getChannel(it) }
+            val showCount = channel?.let { repository.countShows(it.id) } ?: 0
             _uiState.update {
                 it.withStack(BackStack.push(it.backStack, Screen.ChannelEditor)).copy(
                     channelEditor = ChannelEditorState(
@@ -206,12 +210,172 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ageRating = channel?.ageRating ?: 7,
                         kidSafeOnly = channel?.kidSafeOnly ?: false,
                         isNew = channel == null,
-                        number = channel?.number?.takeIf { n -> n > 0 }
+                        number = channel?.number?.takeIf { n -> n > 0 },
+                        showCount = showCount
                     ),
                     editingUnlocked = it.editingUnlocked || unlock
                 )
             }
         }
+    }
+
+    fun openLineupEditor(channelId: String) {
+        if (!canEdit()) return
+        viewModelScope.launch {
+            if (repository.getChannel(channelId) == null) return@launch
+            val shows = repository.getAllShows()
+            val selected = repository.getShowIds(channelId)
+            _uiState.update {
+                // Re-check: kid-safe may have been switched on while the lookup ran.
+                if (kidSafe && !it.editingUnlocked) return@update it
+                it.withStack(BackStack.push(it.backStack, Screen.LineupEditor(channelId))).copy(
+                    lineupEditor = LineupEditorState(channelId, shows, selected)
+                )
+            }
+        }
+    }
+
+    fun toggleLineupShow(showId: String) {
+        _uiState.update { state ->
+            val editor = state.lineupEditor ?: return@update state
+            state.copy(lineupEditor = editor.toggled(showId))
+        }
+    }
+
+    fun saveLineup() {
+        if (!canEdit()) return
+        val editor = _uiState.value.lineupEditor ?: return
+        if (editor.validate() != null) {
+            _uiState.update { it.copy(lineupEditor = editor.copy(error = str(R.string.error_lineup_empty))) }
+            return
+        }
+        viewModelScope.launch {
+            val known = editor.shows.map { it.id }.toSet()
+            val chosen = editor.selected.filter { it in known }
+            repository.setChannelShows(editor.channelId, chosen)
+            _uiState.update { state ->
+                val popped = state.withStack(BackStack.pop(state.backStack) ?: BackStack.Initial)
+                popped.copy(
+                    channelEditor = popped.channelEditor?.takeIf { it.channelId == editor.channelId }
+                        ?.copy(showCount = chosen.size) ?: popped.channelEditor
+                )
+            }
+            // The channel list (kid-safe visibility) and every program depend on the lineup.
+            updateChannelList()
+        }
+    }
+
+    fun cancelLineupEditor() {
+        if (_uiState.value.screen is Screen.LineupEditor) navigateBack()
+    }
+
+    /** Opens the show editor for a new show ([showId] null) or an existing one, from the lineup. */
+    fun openShowEditor(showId: String? = null) {
+        if (!canEdit()) return
+        if (_uiState.value.screen !is Screen.LineupEditor) return
+        viewModelScope.launch {
+            val show = showId?.let { repository.getShow(it) }
+            if (showId != null && show == null) return@launch
+            _uiState.update {
+                if (kidSafe && !it.editingUnlocked) return@update it
+                it.withStack(BackStack.push(it.backStack, Screen.ShowEditor(showId))).copy(
+                    showEditor = show?.let(ShowEditorState::from) ?: ShowEditorState(null)
+                )
+            }
+        }
+    }
+
+    private fun updateShowEditor(change: (ShowEditorState) -> ShowEditorState) {
+        _uiState.update { state ->
+            val editor = state.showEditor ?: return@update state
+            state.copy(showEditor = change(editor))
+        }
+    }
+
+    fun updateShowTitle(title: String) = updateShowEditor { it.withTitle(title) }
+
+    fun updateShowContentId(contentId: String) = updateShowEditor { it.withContentId(contentId) }
+
+    fun stepShowProvider(direction: Int) = updateShowEditor { it.steppedProvider(direction) }
+
+    fun stepShowSeasons(direction: Int) = updateShowEditor { it.steppedSeasons(direction) }
+
+    fun stepShowEpisodes(direction: Int) = updateShowEditor { it.steppedEpisodes(direction) }
+
+    fun stepShowAgeRating(direction: Int) = updateShowEditor { it.steppedAge(direction) }
+
+    fun stepShowLink(direction: Int) = updateShowEditor { it.steppedLink(direction) }
+
+    fun saveShowEditor() {
+        if (!canEdit()) return
+        val editor = _uiState.value.showEditor ?: return
+        val problem = editor.validate()
+        if (problem != null) {
+            val message = when (problem) {
+                ShowError.TITLE_REQUIRED -> str(R.string.error_show_title_required)
+                ShowError.CONTENT_ID_REQUIRED -> str(R.string.error_show_content_id_required)
+                ShowError.SEASONS_RANGE -> str(R.string.error_show_seasons_range)
+                ShowError.EPISODES_RANGE -> str(R.string.error_show_episodes_range)
+                ShowError.AGE_RANGE -> str(R.string.error_age_rating_range)
+            }
+            _uiState.update { it.copy(showEditor = editor.copy(error = message)) }
+            return
+        }
+        viewModelScope.launch {
+            val id = editor.showId
+                ?: uniqueId(
+                    slugify(editor.title, "show"),
+                    repository.getAllShows().map { it.id }.toSet()
+                )
+            val show = editor.toEntity(id)
+            repository.upsertShow(show)
+            val library = repository.getAllShows()
+            _uiState.update { state ->
+                val lineup = state.lineupEditor?.let {
+                    // A show created from a lineup joins that lineup (still unsaved).
+                    it.copy(shows = library, selected = if (editor.isNew) it.selected + id else it.selected)
+                }
+                state.withStack(BackStack.pop(state.backStack) ?: BackStack.Initial).copy(lineupEditor = lineup)
+            }
+            updateChannelList()
+        }
+    }
+
+    /** First press asks for confirmation; the second press deletes. */
+    fun requestDeleteShow() {
+        if (!canEdit()) return
+        val editor = _uiState.value.showEditor ?: return
+        val showId = editor.showId ?: return
+        if (!editor.confirmingDelete) {
+            _uiState.update { it.copy(showEditor = editor.copy(confirmingDelete = true, error = null)) }
+            return
+        }
+        viewModelScope.launch {
+            val emptied = repository.getChannelsOnlyShowing(showId)
+            if (emptied.isNotEmpty()) {
+                val names = allChannels.filter { it.id in emptied }.joinToString { it.name }
+                _uiState.update {
+                    it.copy(
+                        showEditor = editor.copy(
+                            confirmingDelete = false,
+                            error = str(R.string.error_show_delete_last, names.ifBlank { emptied.joinToString() })
+                        )
+                    )
+                }
+                return@launch
+            }
+            repository.deleteShow(showId)
+            val library = repository.getAllShows()
+            _uiState.update { state ->
+                val lineup = state.lineupEditor?.let { it.copy(shows = library, selected = it.selected - showId) }
+                state.withStack(BackStack.pop(state.backStack) ?: BackStack.Initial).copy(lineupEditor = lineup)
+            }
+            updateChannelList()
+        }
+    }
+
+    fun cancelShowEditor() {
+        if (_uiState.value.screen is Screen.ShowEditor) navigateBack()
     }
 
     fun updateChannelName(name: String) {
@@ -488,15 +652,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun startProgram(activity: Activity, program: Program) {
         val intent = resolver.resolveIntent(program.show, program.season, program.episode)
-        if (intent != null) {
-            orchestrator.startPlayback(activity, intent, program)
+        if (intent != null && orchestrator.startPlayback(activity, intent, program)) {
             engine.recordPlayed(program)
             _uiState.update { it.copy(currentProgram = program, message = null) }
         } else {
+            // Not installed (or it vanished after the last check): no autoplay state was saved.
             _uiState.update {
                 it.copy(
                     message = str(R.string.provider_unavailable, program.show.provider.displayName),
-                    currentProgram = program
+                    currentProgram = program,
+                    providerAvailable = false
+                )
+            }
+        }
+    }
+
+    /**
+     * Re-checks the current program's provider (called from onResume): it may have been
+     * installed or removed while the app was in the background.
+     */
+    fun refreshProviderAvailability() {
+        val program = _uiState.value.currentProgram ?: return
+        viewModelScope.launch {
+            val provider = program.show.provider
+            val available = withContext(Dispatchers.Default) { resolver.isProviderAvailable(provider) }
+            _uiState.update { state ->
+                if (state.currentProgram?.show?.provider != provider) return@update state
+                val staleMessage = str(R.string.provider_unavailable, provider.displayName)
+                state.copy(
+                    providerAvailable = available,
+                    message = if (available && state.message == staleMessage) null else state.message
                 )
             }
         }
@@ -604,11 +789,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun MainUiState.withStack(stack: List<Screen>): MainUiState {
         val hasRule = stack.any { it is Screen.RuleEditor }
         val hasChannel = stack.any { it is Screen.ChannelEditor }
+        val hasLineup = stack.any { it is Screen.LineupEditor }
+        val hasShow = stack.any { it is Screen.ShowEditor }
         return copy(
             backStack = stack,
             ruleEditor = ruleEditor.takeIf { hasRule },
             channelEditor = channelEditor.takeIf { hasChannel },
-            editingUnlocked = editingUnlocked && (hasRule || hasChannel)
+            lineupEditor = lineupEditor.takeIf { hasLineup },
+            showEditor = showEditor.takeIf { hasShow },
+            editingUnlocked = editingUnlocked && stack.any { it.isEditor }
         )
     }
 

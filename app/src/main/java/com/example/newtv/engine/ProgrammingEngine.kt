@@ -7,6 +7,8 @@ import com.example.newtv.data.ScheduleRuleEntity
 import com.example.newtv.data.ShowEntity
 import com.example.newtv.data.TvRepository
 import com.example.newtv.resolver.DeepLinkResolver
+import com.example.newtv.resolver.LinkKind
+import com.example.newtv.resolver.LinkSelector
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -20,7 +22,9 @@ data class Program(
     val episode: Int,
     val deepLink: String?,
     val startTime: Instant,
-    val endTime: Instant
+    val endTime: Instant,
+    /** Whether [deepLink] opens this episode or only the show's title page. */
+    val linkKind: LinkKind = LinkKind.TITLE_PAGE
 ) {
     /** Fraction of the program elapsed at [now], clamped to 0..1. */
     fun progress(now: Instant): Float {
@@ -185,7 +189,8 @@ class ProgrammingEngine(
             episode = episode,
             deepLink = resolver.buildDeepLink(show, season, episode),
             startTime = start,
-            endTime = end
+            endTime = end,
+            linkKind = LinkSelector.kindFor(show)
         )
     }
 

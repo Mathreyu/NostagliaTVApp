@@ -42,6 +42,8 @@
     <string name="program_time_episode">%1$s • S%2$dE%3$d</string>
     <string name="program_airs_at">%1$s (S%2$dE%3$d) airs at %4$s on CH %5$02d</string>
     <string name="provider_unavailable">%1$s is not available. Install it to watch.</string>
+    <string name="link_title_page_hint">Opens the show page in %1$s — pick S%2$dE%3$d</string>
+    <string name="edit_lineup">Lineup</string>
 
     <!-- Schedule -->
     <string name="schedule_title">Guide</string>
@@ -78,6 +80,41 @@
     <string name="age_rating_value">%1$d+</string>
     <string name="error_channel_name_required">Channel name is required.</string>
     <string name="error_age_rating_range">Age rating must be 0–21.</string>
+
+    <string name="channel_show_count">Shows in lineup</string>
+
+    <!-- Lineup editor -->
+    <string name="lineup_editor_title">Channel lineup</string>
+    <string name="lineup_editor_help">Switch shows ON to put them on this channel. At least one is required.</string>
+    <string name="lineup_show_label">%1$s • %2$s • %3$d+</string>
+    <string name="lineup_empty_library">The show library is empty. Create a show to get started.</string>
+    <string name="new_show">New show</string>
+    <string name="edit_show">Edit</string>
+    <string name="error_lineup_empty">A channel needs at least one show. Switch one ON.</string>
+
+    <!-- Show editor -->
+    <string name="show_editor_add_title">New show</string>
+    <string name="show_editor_edit_title">Edit show</string>
+    <string name="show_editor_help">Content ID is the show\'s ID in the provider app. Links open the provider app only.</string>
+    <string name="show_title">Title</string>
+    <string name="show_title_placeholder">Select to type a title</string>
+    <string name="show_provider">Provider</string>
+    <string name="show_seasons">Seasons</string>
+    <string name="show_episodes_per_season">Episodes per season</string>
+    <string name="show_content_id">Content ID</string>
+    <string name="show_content_id_placeholder">Select to type the provider\'s ID</string>
+    <string name="show_link">Deep link</string>
+    <string name="link_choice_title_page">Show page</string>
+    <string name="link_choice_episode">Episode link</string>
+    <string name="link_choice_custom">Custom (kept)</string>
+    <string name="delete_show">Delete show</string>
+    <string name="delete_show_confirm">Press again to delete</string>
+    <string name="delete_show_warning">Delete this show? It is removed from every channel.</string>
+    <string name="error_show_title_required">Title is required.</string>
+    <string name="error_show_content_id_required">Content ID is required.</string>
+    <string name="error_show_seasons_range">Seasons must be 1–30.</string>
+    <string name="error_show_episodes_range">Episodes per season must be 1–60.</string>
+    <string name="error_show_delete_last">Can\'t delete: %1$s would be left with no shows.</string>
 
     <!-- Parental lock -->
     <string name="pin_window_title">Kid-safe setup</string>

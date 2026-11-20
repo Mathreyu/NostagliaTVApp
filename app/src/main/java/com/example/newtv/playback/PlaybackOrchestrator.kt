@@ -1,6 +1,7 @@
 package com.example.newtv.playback
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import com.example.newtv.engine.Program
@@ -9,13 +10,24 @@ import java.time.Instant
 class PlaybackOrchestrator(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun startPlayback(activity: Activity, intent: Intent, program: Program) {
+    /**
+     * Hands playback to the provider app. Returns false, leaving the autoplay state untouched,
+     * when the provider cannot be launched (for example it was uninstalled after the check).
+     */
+    fun startPlayback(activity: Activity, intent: Intent, program: Program): Boolean {
+        try {
+            activity.startActivity(intent)
+        } catch (exception: ActivityNotFoundException) {
+            return false
+        } catch (exception: SecurityException) {
+            return false
+        }
         prefs.edit()
             .putString(KEY_LAST_CHANNEL, program.channel.id)
             .putLong(KEY_STARTED_AT, Instant.now().toEpochMilli())
             .putBoolean(KEY_SHOULD_AUTOPLAY, true)
             .apply()
-        activity.startActivity(intent)
+        return true
     }
 
     fun shouldAutoPlay(): Boolean {

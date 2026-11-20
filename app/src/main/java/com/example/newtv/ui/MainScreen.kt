@@ -21,6 +21,8 @@ import com.example.newtv.ui.components.ParentalLockPad
 import com.example.newtv.ui.screens.ChannelEditorScreen
 import com.example.newtv.ui.screens.ChannelScreen
 import com.example.newtv.ui.screens.HomeScreen
+import com.example.newtv.ui.screens.LineupEditorScreen
+import com.example.newtv.ui.screens.ShowEditorScreen
 import com.example.newtv.ui.screens.RuleEditorScreen
 import com.example.newtv.ui.screens.ScheduleScreen
 
@@ -80,6 +82,7 @@ private fun ScreenContent(uiState: MainUiState, viewModel: MainViewModel) {
             onParentSettings = { viewModel.requestParentAction(ParentAction.EditChannel(it)) },
             onEditRules = viewModel::openRuleEditor,
             onEditChannel = viewModel::openChannelEditor,
+            onEditLineup = viewModel::openLineupEditor,
             onInstallProvider = viewModel::openProviderInstall,
             onDismissMessage = viewModel::dismissMessage,
             onChannelUp = viewModel::channelUp,
@@ -96,12 +99,34 @@ private fun ScreenContent(uiState: MainUiState, viewModel: MainViewModel) {
             onSave = viewModel::saveRuleEditor,
             onCancel = viewModel::cancelRuleEditor
         )
+        is Screen.LineupEditor -> LineupEditorScreen(
+            uiState = uiState,
+            onToggle = viewModel::toggleLineupShow,
+            onNewShow = { viewModel.openShowEditor(null) },
+            onEditShow = viewModel::openShowEditor,
+            onSave = viewModel::saveLineup,
+            onCancel = viewModel::cancelLineupEditor
+        )
+        is Screen.ShowEditor -> ShowEditorScreen(
+            uiState = uiState,
+            onTitleChange = viewModel::updateShowTitle,
+            onContentIdChange = viewModel::updateShowContentId,
+            onStepProvider = viewModel::stepShowProvider,
+            onStepSeasons = viewModel::stepShowSeasons,
+            onStepEpisodes = viewModel::stepShowEpisodes,
+            onStepAgeRating = viewModel::stepShowAgeRating,
+            onStepLink = viewModel::stepShowLink,
+            onSave = viewModel::saveShowEditor,
+            onCancel = viewModel::cancelShowEditor,
+            onDelete = viewModel::requestDeleteShow
+        )
         Screen.ChannelEditor -> ChannelEditorScreen(
             uiState = uiState,
             onNameChange = viewModel::updateChannelName,
             onStepAgeRating = viewModel::stepChannelAgeRating,
             onToggleKidSafe = viewModel::toggleChannelKidSafeOnly,
             onEditRules = viewModel::openRuleEditor,
+            onEditLineup = viewModel::openLineupEditor,
             onSave = viewModel::saveChannelEditor,
             onCancel = viewModel::cancelChannelEditor
         )

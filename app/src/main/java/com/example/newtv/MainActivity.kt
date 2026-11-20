@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        viewModel.refreshProviderAvailability()
         viewModel.handleReturnFromPlayback(this)
     }
 }

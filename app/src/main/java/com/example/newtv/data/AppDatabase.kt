@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ScheduleRuleEntity::class,
         RecentEpisodeEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -62,6 +62,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v3 -> v4: see [Migrations.V3_TO_V4]. */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Migrations.V3_TO_V4.forEach(db::execSQL)
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase =
             instance ?: synchronized(this) {
                 instance ?: buildDatabase(context).also { instance = it }
@@ -69,7 +76,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private fun buildDatabase(context: Context): AppDatabase {
             return Room.databaseBuilder(context, AppDatabase::class.java, "newtv.db")
-                .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                 // Pre-release v1 schema has no migration path.
                 .fallbackToDestructiveMigrationFrom(true, 1)
                 .build()

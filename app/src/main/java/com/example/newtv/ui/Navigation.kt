@@ -8,6 +8,10 @@ sealed class Screen {
     data class Schedule(val channelId: String) : Screen()
     data class RuleEditor(val channelId: String) : Screen()
     data object ChannelEditor : Screen()
+    data class LineupEditor(val channelId: String) : Screen()
+
+    /** Create ([showId] null) or edit one show of the library. */
+    data class ShowEditor(val showId: String?) : Screen()
 
     /** Id of the channel this screen shows, if any. */
     val ownerChannelId: String?
@@ -15,10 +19,12 @@ sealed class Screen {
             is Channel -> channelId
             is Schedule -> channelId
             is RuleEditor -> channelId
-            Home, ChannelEditor -> null
+            is LineupEditor -> channelId
+            Home, ChannelEditor, is ShowEditor -> null
         }
 
-    val isEditor: Boolean get() = this is RuleEditor || this is ChannelEditor
+    val isEditor: Boolean
+        get() = this is RuleEditor || this is ChannelEditor || this is LineupEditor || this is ShowEditor
 }
 
 /** Something a parent must unlock with the PIN while kid-safe mode stays on. */

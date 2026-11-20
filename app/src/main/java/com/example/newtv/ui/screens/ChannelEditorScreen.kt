@@ -36,6 +36,7 @@ fun ChannelEditorScreen(
     onStepAgeRating: (Int) -> Unit,
     onToggleKidSafe: () -> Unit,
     onEditRules: (String) -> Unit,
+    onEditLineup: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -66,6 +67,12 @@ fun ChannelEditorScreen(
                             stringResource(R.string.channel_number_auto)
                         }
                     )
+                    if (!editor.isNew) {
+                        ValueRow(
+                            label = stringResource(R.string.channel_show_count),
+                            valueText = editor.showCount.toString()
+                        )
+                    }
                     StepperRow(
                         label = stringResource(R.string.age_rating),
                         valueText = stringResource(R.string.age_rating_value, editor.ageRating),
@@ -90,6 +97,11 @@ fun ChannelEditorScreen(
                         NostalgiaButton(
                             text = stringResource(R.string.edit_rules),
                             onClick = { onEditRules(editor.channelId) },
+                            secondary = true
+                        )
+                        NostalgiaButton(
+                            text = stringResource(R.string.edit_lineup),
+                            onClick = { onEditLineup(editor.channelId) },
                             secondary = true
                         )
                     }

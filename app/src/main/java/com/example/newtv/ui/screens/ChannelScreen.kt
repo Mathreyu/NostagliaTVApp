@@ -36,6 +36,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.example.newtv.R
 import com.example.newtv.engine.Program
+import com.example.newtv.resolver.LinkKind
 import com.example.newtv.ui.MainUiState
 import com.example.newtv.ui.NostalgiaColors
 import com.example.newtv.ui.NostalgiaShapes
@@ -72,6 +73,7 @@ fun ChannelScreen(
     onParentSettings: (String) -> Unit,
     onEditRules: (String) -> Unit,
     onEditChannel: (String) -> Unit,
+    onEditLineup: (String) -> Unit,
     onInstallProvider: (Activity) -> Unit,
     onDismissMessage: () -> Unit,
     onChannelUp: () -> Unit,
@@ -151,6 +153,17 @@ fun ChannelScreen(
             }
         }
 
+        if (program != null && program.linkKind == LinkKind.TITLE_PAGE && !unavailable) {
+            OsdBanner(
+                text = stringResource(
+                    R.string.link_title_page_hint,
+                    program.show.provider.displayName,
+                    program.season,
+                    program.episode
+                )
+            )
+        }
+
         if (program != null) {
             NowPlaying(program, accent, uiState, formatter, zone)
         } else {
@@ -184,6 +197,7 @@ fun ChannelScreen(
                 action(stringResource(R.string.parent_settings), secondary = true) { onParentSettings(channelId) }
             } else {
                 action(stringResource(R.string.edit_rules), secondary = true) { onEditRules(channelId) }
+                action(stringResource(R.string.edit_lineup), secondary = true) { onEditLineup(channelId) }
                 action(stringResource(R.string.edit_channel), secondary = true) { onEditChannel(channelId) }
             }
             action(stringResource(R.string.back), secondary = true, onClick = onBack)
