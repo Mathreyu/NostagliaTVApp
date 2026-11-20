@@ -151,6 +151,10 @@ fun PadlockIcon(modifier: Modifier = Modifier, color: Color = NostalgiaColors.Os
             size = Size(w * 0.52f, h * 0.5f),
             style = Stroke(width = stroke, cap = StrokeCap.Butt)
         )
+        // Shackle legs down into the body, so the lock reads as closed.
+        listOf(w * 0.24f, w * 0.76f).forEach { x ->
+            drawLine(color, Offset(x, h * 0.31f), Offset(x, h * 0.46f), strokeWidth = stroke)
+        }
         // Body.
         drawRoundRect(
             color = color,
