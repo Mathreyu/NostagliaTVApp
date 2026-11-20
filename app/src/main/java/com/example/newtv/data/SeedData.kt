@@ -7,19 +7,25 @@ object SeedData {
                 id = "cartoons",
                 name = "Saturday Morning Cartoons",
                 ageRating = 7,
-                kidSafeOnly = true
+                kidSafeOnly = true,
+                number = 3,
+                accentColor = 0xFFFF4FD8
             ),
             ChannelEntity(
                 id = "classic_nick",
                 name = "Classic Nickelodeon",
                 ageRating = 10,
-                kidSafeOnly = false
+                kidSafeOnly = false,
+                number = 7,
+                accentColor = 0xFF33F6FF
             ),
             ChannelEntity(
                 id = "disney_after_school",
                 name = "Disney After School",
                 ageRating = 7,
-                kidSafeOnly = true
+                kidSafeOnly = true,
+                number = 11,
+                accentColor = 0xFF8CFF5E
             )
         )
 

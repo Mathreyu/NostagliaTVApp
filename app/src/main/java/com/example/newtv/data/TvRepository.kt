@@ -16,6 +16,9 @@ open class TvRepository(protected val database: AppDatabase?) {
         SeedData.seed(db)
     }
 
+    open suspend fun getMaxChannelNumber(): Int =
+        requireNotNull(database).channelDao().getMaxNumber()
+
     open suspend fun getChannel(channelId: String): ChannelEntity? =
         requireNotNull(database).channelDao().getChannel(channelId)
 
@@ -33,24 +36,10 @@ open class TvRepository(protected val database: AppDatabase?) {
         requireNotNull(database).ruleDao().insertRules(listOf(rule))
     }
 
-    open suspend fun getChannelState(channelId: String): ChannelStateEntity? =
-        requireNotNull(database).stateDao().getChannelState(channelId)
-
-    open suspend fun upsertChannelState(state: ChannelStateEntity) {
-        requireNotNull(database).stateDao().upsertChannelState(state)
-    }
-
-    open suspend fun getEpisodeState(showId: String): EpisodeStateEntity? =
-        requireNotNull(database).stateDao().getEpisodeState(showId)
-
-    open suspend fun upsertEpisodeState(state: EpisodeStateEntity) {
-        requireNotNull(database).stateDao().upsertEpisodeState(state)
-    }
-
     open suspend fun addRecentEpisode(recent: RecentEpisodeEntity) {
-        requireNotNull(database).stateDao().insertRecentEpisode(recent)
+        requireNotNull(database).historyDao().insertRecentEpisode(recent)
     }
 
     open suspend fun getRecentEpisodes(channelId: String, limit: Int): List<RecentEpisodeEntity> =
-        requireNotNull(database).stateDao().getRecentEpisodes(channelId, limit)
+        requireNotNull(database).historyDao().getRecentEpisodes(channelId, limit)
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.newtv.data.AppDatabase
 import com.example.newtv.data.ChannelEntity
+import com.example.newtv.data.ChannelPalette
 import com.example.newtv.data.RotationMode
 import com.example.newtv.data.ScheduleRuleEntity
 import com.example.newtv.data.TvRepository
@@ -31,6 +32,7 @@ data class MainUiState(
     val channels: List<ChannelEntity> = emptyList(),
     val currentProgram: Program? = null,
     val schedule: List<Program> = emptyList(),
+    val nowPlaying: Map<String, Program> = emptyMap(),
     val kidSafeEnabled: Boolean = false,
     val providerAvailable: Boolean? = null,
     val message: String? = null,
@@ -93,6 +95,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             repository.observeChannels().collectLatest { channels ->
                 allChannels = channels
                 updateChannelList()
+                refreshNowPlaying()
             }
         }
     }
@@ -176,11 +179,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             val resolvedId = editor.channelId ?: generateChannelId(editor.name)
+            val existing = editor.channelId?.let { repository.getChannel(it) }
+            val number = existing?.number?.takeIf { it > 0 }
+                ?: (repository.getMaxChannelNumber() + 1)
+            val accent = existing?.accentColor ?: ChannelPalette.forNumber(number)
             val channel = ChannelEntity(
                 id = resolvedId,
                 name = editor.name.trim(),
                 ageRating = ageRating ?: 0,
-                kidSafeOnly = editor.kidSafeOnly
+                kidSafeOnly = editor.kidSafeOnly,
+                number = number,
+                accentColor = accent
             )
             repository.upsertChannel(channel)
             val existingRule = repository.getRules(resolvedId).firstOrNull()
@@ -273,6 +282,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun backToHome() {
         _uiState.update { it.copy(screen = Screen.Home) }
+        refreshNowPlaying()
     }
 
     /** Enables kid-safe mode, asking the parent to create a PIN first if none exists. */
@@ -359,6 +369,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val intent = resolver.resolveIntent(program.show, program.season, program.episode)
             if (intent != null) {
                 orchestrator.startPlayback(activity, intent, program)
+                engine.recordPlayed(program)
                 _uiState.update { it.copy(currentProgram = program, message = null) }
             } else {
                 _uiState.update {
@@ -380,6 +391,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val intent = resolver.resolveIntent(program.show, program.season, program.episode)
             if (intent != null) {
                 orchestrator.startPlayback(activity, intent, program)
+                engine.recordPlayed(program)
                 _uiState.update { it.copy(currentProgram = program, message = null) }
             } else {
                 _uiState.update {
@@ -406,14 +418,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val program = engine.getProgramNow(channelId)
             val schedule = engine.getSchedulePreview(channelId)
+            val nowPlaying = engine.getNowPlaying(allChannels.map { it.id })
             val providerAvailable = program?.show?.provider?.let { resolver.isProviderAvailable(it) }
             _uiState.update {
                 it.copy(
                     currentProgram = program,
                     schedule = schedule,
+                    nowPlaying = nowPlaying,
                     providerAvailable = providerAvailable
                 )
             }
+        }
+    }
+
+    private fun refreshNowPlaying() {
+        viewModelScope.launch {
+            val nowPlaying = engine.getNowPlaying(allChannels.map { it.id })
+            _uiState.update { it.copy(nowPlaying = nowPlaying) }
         }
     }
 
