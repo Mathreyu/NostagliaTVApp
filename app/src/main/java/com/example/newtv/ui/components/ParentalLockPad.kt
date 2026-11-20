@@ -175,34 +175,6 @@ private fun PadKey(label: String, emphasized: Boolean, modifier: Modifier, onCli
     }
 }
 
-@Composable
-private fun PadlockIcon() {
-    val c = NostalgiaColors.OsdGreen
-    Canvas(Modifier.size(34.dp)) {
-        val w = size.width
-        val h = size.height
-        val stroke = w * 0.11f
-        // Shackle.
-        drawArc(
-            color = c,
-            startAngle = 180f,
-            sweepAngle = 180f,
-            useCenter = false,
-            topLeft = Offset(w * 0.24f, h * 0.06f),
-            size = Size(w * 0.52f, h * 0.5f),
-            style = Stroke(width = stroke, cap = StrokeCap.Butt)
-        )
-        // Body.
-        drawRoundRect(
-            color = c,
-            topLeft = Offset(w * 0.14f, h * 0.42f),
-            size = Size(w * 0.72f, h * 0.52f),
-            cornerRadius = CornerRadius(w * 0.08f)
-        )
-        drawCircle(NostalgiaColors.Background, radius = w * 0.07f, center = Offset(w * 0.5f, h * 0.64f))
-    }
-}
-
 @Preview(widthDp = 960, heightDp = 540)
 @Composable
 private fun ParentalLockPadPreview() {

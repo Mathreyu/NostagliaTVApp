@@ -37,14 +37,6 @@ import com.example.newtv.ui.NostalgiaShapes
 import com.example.newtv.ui.osdTextStyle
 
 @Composable
-fun SectionTitle(title: String) {
-    Text(
-        text = title.uppercase(),
-        style = osdTextStyle(30)
-    )
-}
-
-@Composable
 fun TileCard(
     title: String,
     subtitle: String,
@@ -52,9 +44,10 @@ fun TileCard(
     width: Dp,
     height: Dp,
     accentSeed: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Overrides the seed-derived accent, e.g. with the owning channel's colour. */
+    accent: Color = accentColor(accentSeed)
 ) {
-    val accent = accentColor(accentSeed)
     val shape = NostalgiaShapes.Medium
     val focusBorder = Border(BorderStroke(NostalgiaFocus.BorderWidth, NostalgiaColors.Focus), 0.dp, shape)
     Card(
@@ -108,77 +101,6 @@ fun TileCard(
     }
 }
 
-/** List row. When [onClick] is given the row is focusable and selectable (D-pad scrolls lists). */
-@Composable
-fun TileRow(
-    title: String,
-    subtitle: String,
-    accentSeed: String,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
-    val accent = accentColor(accentSeed)
-    val shape = NostalgiaShapes.Medium
-    val content: @Composable () -> Unit = {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(64.dp)
-                    .width(96.dp)
-                    .background(accent.copy(alpha = 0.30f), NostalgiaShapes.Small)
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = NostalgiaColors.TextMuted
-                )
-            }
-        }
-    }
-    if (onClick == null) {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(NostalgiaColors.Surface, shape)
-                .border(2.dp, accent.copy(alpha = 0.55f), shape)
-        ) { content() }
-    } else {
-        Surface(
-            onClick = onClick,
-            modifier = modifier.fillMaxWidth(),
-            shape = ClickableSurfaceDefaults.shape(shape),
-            colors = ClickableSurfaceDefaults.colors(
-                containerColor = NostalgiaColors.Surface,
-                focusedContainerColor = NostalgiaColors.SurfaceRaised,
-                contentColor = NostalgiaColors.TextPrimary,
-                focusedContentColor = NostalgiaColors.TextPrimary
-            ),
-            scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
-            border = ClickableSurfaceDefaults.border(
-                border = Border(BorderStroke(2.dp, accent.copy(alpha = 0.55f)), 0.dp, shape),
-                focusedBorder = Border(BorderStroke(NostalgiaFocus.BorderWidth, NostalgiaColors.Focus), 0.dp, shape)
-            ),
-            glow = ClickableSurfaceDefaults.glow(
-                focusedGlow = Glow(NostalgiaFocus.GlowColor, NostalgiaFocus.GlowElevation)
-            )
-        ) { content() }
-    }
-}
-
 /** Stable accent for a string seed, always from [ChannelAccents]. */
 internal fun accentColor(seed: String): Color {
     val index = (seed.hashCode() and Int.MAX_VALUE) % ChannelAccents.size
@@ -193,12 +115,10 @@ private fun TilePreview() {
             Modifier.background(NostalgiaColors.Background).padding(48.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SectionTitle("Featured")
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 TileCard("Saturday Cartoons", "Ch 03", {}, 240.dp, 120.dp, "a")
                 TileCard("After School", "Ch 05", {}, 240.dp, 120.dp, "b")
             }
-            TileRow("Late Night", "Ch 09", "c")
         }
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.example.newtv.ui.NewTvTheme
@@ -36,6 +37,7 @@ private val BezelEdge = Color(0xFF3A4066)
 fun NostalgiaWindow(
     title: String,
     modifier: Modifier = Modifier,
+    contentSpacing: Dp = 16.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val outer = NostalgiaShapes.Large
@@ -68,7 +70,7 @@ fun NostalgiaWindow(
                 .background(NostalgiaColors.GuideLine)
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(contentSpacing),
             content = content
         )
     }

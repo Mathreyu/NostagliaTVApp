@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -60,12 +61,26 @@ data class GuideRowModel(
     val cells: List<GuideCellModel>
 )
 
-private val ChannelColumnWidth = 230.dp
-private val RowHeight = 72.dp
-private val HeaderHeight = 44.dp
 private val MinCellWidth = 40.dp
 private const val SLOT_MINUTES = 30L
 private const val MIN_WINDOW_MINUTES = 180L
+
+/** Sizing of a [GuideGrid]: the full guide uses [Regular], the Home preview uses [Compact]. */
+data class GuideMetrics(
+    val channelColumnWidth: Dp,
+    val rowHeight: Dp,
+    val headerHeight: Dp,
+    val headerTextSize: Int,
+    val showEpisodeLine: Boolean,
+    val rowGap: Dp
+) {
+    companion object {
+        val Regular = GuideMetrics(230.dp, 72.dp, 44.dp, 26, true, 4.dp)
+        /** Single-channel strip on the schedule screen. */
+        val Strip = GuideMetrics(230.dp, 60.dp, 38.dp, 24, true, 3.dp)
+        val Compact = GuideMetrics(196.dp, 44.dp, 30.dp, 22, false, 3.dp)
+    }
+}
 
 /**
  * Classic cable guide: sticky time header, channel column on the left, and a vertical list of
@@ -79,35 +94,46 @@ fun GuideGrid(
     slotWidthPerMinute: Dp,
     onCellClick: (rowId: String, cellId: String) -> Unit,
     modifier: Modifier = Modifier,
-    zone: ZoneId = ZoneId.systemDefault()
+    zone: ZoneId = ZoneId.systemDefault(),
+    metrics: GuideMetrics = GuideMetrics.Regular,
+    /** Fixed window length in minutes; when null it covers all cells (at least three hours). */
+    fixedWindowMinutes: Int? = null,
+    /** Cells that contain this instant get an accent edge ("on now"). */
+    now: Instant? = null
 ) {
     val scroll = rememberScrollState()
-    val windowMinutes = remember(rows, startTime) {
-        val lastEnd = rows.maxOfOrNull { r -> r.cells.maxOfOrNull { it.end } ?: startTime } ?: startTime
-        val mins = Duration.between(startTime, lastEnd).toMinutes()
-        // Round up to whole slots, at least three hours.
-        (((maxOf(mins, MIN_WINDOW_MINUTES) + SLOT_MINUTES - 1) / SLOT_MINUTES) * SLOT_MINUTES)
+    val windowMinutes = remember(rows, startTime, fixedWindowMinutes) {
+        if (fixedWindowMinutes != null) {
+            fixedWindowMinutes.toLong()
+        } else {
+            val lastEnd = rows.maxOfOrNull { r -> r.cells.maxOfOrNull { it.end } ?: startTime } ?: startTime
+            val mins = Duration.between(startTime, lastEnd).toMinutes()
+            // Round up to whole slots, at least three hours.
+            (((maxOf(mins, MIN_WINDOW_MINUTES) + SLOT_MINUTES - 1) / SLOT_MINUTES) * SLOT_MINUTES)
+        }
     }
+    val rowHeight = metrics.rowHeight
+    val headerHeight = metrics.headerHeight
     val totalWidth = slotWidthPerMinute * windowMinutes.toFloat()
     val labelFormat = remember(zone) { DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()).withZone(zone) }
 
     Column(modifier = modifier) {
         // Time header.
-        Row(Modifier.fillMaxWidth().height(HeaderHeight)) {
-            Box(Modifier.width(ChannelColumnWidth))
-            Box(Modifier.weight(1f).height(HeaderHeight).horizontalScroll(scroll, enabled = false)) {
-                Box(Modifier.width(totalWidth).height(HeaderHeight)) {
+        Row(Modifier.fillMaxWidth().height(headerHeight)) {
+            Box(Modifier.width(metrics.channelColumnWidth))
+            Box(Modifier.weight(1f).height(headerHeight).horizontalScroll(scroll, enabled = false)) {
+                Box(Modifier.width(totalWidth).height(headerHeight)) {
                     var m = 0L
                     while (m < windowMinutes) {
                         val x = slotWidthPerMinute * m.toFloat()
                         Row(
-                            Modifier.offset(x = x).height(HeaderHeight),
+                            Modifier.offset(x = x).height(headerHeight),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(Modifier.width(2.dp).height(HeaderHeight).background(NostalgiaColors.GuideLine))
+                            Box(Modifier.width(2.dp).height(headerHeight).background(NostalgiaColors.GuideLine))
                             Text(
                                 text = labelFormat.format(startTime.plusSeconds(m * 60)).uppercase(),
-                                style = osdTextStyle(26),
+                                style = osdTextStyle(metrics.headerTextSize),
                                 maxLines = 1,
                                 softWrap = false,
                                 modifier = Modifier.padding(start = 8.dp)
@@ -122,27 +148,29 @@ fun GuideGrid(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 6.dp)
+            verticalArrangement = Arrangement.spacedBy(metrics.rowGap),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = metrics.rowGap)
         ) {
             items(rows, key = { it.id }) { row ->
-                Row(Modifier.fillMaxWidth().height(RowHeight)) {
-                    ChannelHeaderCell(row)
-                    Box(Modifier.weight(1f).height(RowHeight).horizontalScroll(scroll)) {
-                        Box(Modifier.width(totalWidth).height(RowHeight)) {
+                Row(Modifier.fillMaxWidth().height(rowHeight)) {
+                    ChannelHeaderCell(row, metrics)
+                    Box(Modifier.weight(1f).height(rowHeight).horizontalScroll(scroll)) {
+                        Box(Modifier.width(totalWidth).height(rowHeight)) {
                             row.cells.forEach { cell ->
                                 val startMin = Duration.between(startTime, cell.start).toMinutes().coerceAtLeast(0L)
                                 val endMin = Duration.between(startTime, cell.end).toMinutes().coerceAtMost(windowMinutes)
                                 if (endMin > startMin) {
                                     GuideCell(
                                         cell = cell,
+                                        accent = row.accent.takeIf { now != null && now >= cell.start && now < cell.end },
+                                        showSubtitle = metrics.showEpisodeLine,
                                         modifier = Modifier
                                             .offset(x = slotWidthPerMinute * startMin.toFloat())
                                             .width(
                                                 (slotWidthPerMinute * (endMin - startMin).toFloat() - 4.dp)
                                                     .coerceAtLeast(MinCellWidth)
                                             )
-                                            .height(RowHeight),
+                                            .height(rowHeight),
                                         onClick = { onCellClick(row.id, cell.id) }
                                     )
                                 }
@@ -156,11 +184,11 @@ fun GuideGrid(
 }
 
 @Composable
-private fun ChannelHeaderCell(row: GuideRowModel) {
+private fun ChannelHeaderCell(row: GuideRowModel, metrics: GuideMetrics) {
     Row(
         modifier = Modifier
-            .width(ChannelColumnWidth)
-            .height(RowHeight)
+            .width(metrics.channelColumnWidth)
+            .height(metrics.rowHeight)
             .padding(end = 6.dp)
             .background(NostalgiaColors.Surface, NostalgiaShapes.Small)
             .padding(horizontal = 10.dp),
@@ -178,7 +206,13 @@ private fun ChannelHeaderCell(row: GuideRowModel) {
 }
 
 @Composable
-private fun GuideCell(cell: GuideCellModel, modifier: Modifier, onClick: () -> Unit) {
+private fun GuideCell(
+    cell: GuideCellModel,
+    accent: Color?,
+    showSubtitle: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
     val shape = NostalgiaShapes.Small
     Surface(
         onClick = onClick,
@@ -201,8 +235,10 @@ private fun GuideCell(cell: GuideCellModel, modifier: Modifier, onClick: () -> U
             focusedGlow = Glow(NostalgiaFocus.GlowColor, 10.dp)
         )
     ) {
+        Row(Modifier.fillMaxSize()) {
+        if (accent != null) Box(Modifier.fillMaxHeight().width(5.dp).background(accent))
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 6.dp),
+            Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
@@ -211,7 +247,7 @@ private fun GuideCell(cell: GuideCellModel, modifier: Modifier, onClick: () -> U
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (!cell.subtitle.isNullOrBlank()) {
+            if (showSubtitle && !cell.subtitle.isNullOrBlank()) {
                 Text(
                     text = cell.subtitle,
                     style = MaterialTheme.typography.bodySmall,
@@ -219,6 +255,7 @@ private fun GuideCell(cell: GuideCellModel, modifier: Modifier, onClick: () -> U
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
         }
     }
 }

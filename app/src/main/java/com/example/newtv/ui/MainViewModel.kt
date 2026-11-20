@@ -23,6 +23,8 @@ import com.example.newtv.security.KidSafePrefs
 import com.example.newtv.security.PinCheck
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
 
 data class MainUiState(
     /** Navigation back stack; Home is the root and the last element is the visible screen. */
@@ -39,6 +42,10 @@ data class MainUiState(
     val currentProgram: Program? = null,
     val schedule: List<Program> = emptyList(),
     val nowPlaying: Map<String, Program> = emptyMap(),
+    /** Per channel id: the current program followed by the next few (kid-safe filtered). */
+    val guide: Map<String, List<Program>> = emptyMap(),
+    /** Wall-clock time of the last tick; progress bars and the guide window derive from it. */
+    val now: Instant = Instant.now(),
     val kidSafeEnabled: Boolean = false,
     val providerAvailable: Boolean? = null,
     val message: String? = null,
@@ -77,6 +84,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 updateChannelList()
             }
         }
+        // Ticker: keeps "now" and the guide current at each slot boundary. Cancelled with the scope.
+        viewModelScope.launch {
+            while (isActive) {
+                delay(LiveBoard.TICK_MILLIS)
+                tick()
+            }
+        }
+    }
+
+    private fun tick() {
+        val now = Instant.now()
+        val state = _uiState.value
+        _uiState.update { it.copy(now = now) }
+        if (LiveBoard.needsRefresh(state.nowPlaying, state.currentProgram, now)) afterStackChange()
     }
 
     private fun str(@StringRes id: Int, vararg args: Any): String =
@@ -425,6 +446,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { state ->
             var next = state.copy(kidSafeEnabled = enabled, editingUnlocked = false)
             if (enabled) {
+                // Drop anything computed without the filter until the board is rebuilt.
+                next = next.copy(nowPlaying = emptyMap(), guide = emptyMap())
                 val allowed = allChannels.filter(KidSafePolicy::isChannelAllowed).map { it.id }.toSet()
                 next = next.withStack(
                     BackStack.pruneChannels(BackStack.pruneEditors(next.backStack), allowed)
@@ -504,7 +527,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val rating = maxShowRating
             val program = engine.getProgramNow(channelId, maxShowRating = rating)
             val schedule = engine.getSchedulePreview(channelId, maxShowRating = rating)
-            val nowPlaying = engine.getNowPlaying(_uiState.value.channels.map { it.id }, maxShowRating = rating)
+            val board = loadBoard(rating)
             val providerAvailable = program?.show?.provider?.let { resolver.isProviderAvailable(it) }
             _uiState.update {
                 // Ignore a stale result if the user moved to another channel meanwhile.
@@ -513,7 +536,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 else it.copy(
                     currentProgram = program,
                     schedule = schedule,
-                    nowPlaying = nowPlaying,
+                    nowPlaying = board.nowPlaying,
+                    guide = board.guide,
+                    now = board.at,
                     providerAvailable = providerAvailable
                 )
             }
@@ -522,12 +547,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun refreshNowPlaying() {
         viewModelScope.launch {
-            val nowPlaying = engine.getNowPlaying(
-                _uiState.value.channels.map { it.id },
-                maxShowRating = maxShowRating
-            )
-            _uiState.update { it.copy(nowPlaying = nowPlaying) }
+            val board = loadBoard(maxShowRating)
+            _uiState.update { it.copy(nowPlaying = board.nowPlaying, guide = board.guide, now = board.at) }
         }
+    }
+
+    private class Board(
+        val at: Instant,
+        val nowPlaying: Map<String, Program>,
+        val guide: Map<String, List<Program>>
+    )
+
+    /** Current program and the next few for every visible channel, with the kid-safe filter applied. */
+    private suspend fun loadBoard(rating: Int?): Board {
+        val at = Instant.now()
+        val nowPlaying = LinkedHashMap<String, Program>()
+        val guide = LinkedHashMap<String, List<Program>>()
+        for (channel in LiveBoard.ordered(_uiState.value.channels)) {
+            val current = engine.getProgramNow(channel.id, at, rating)
+            val upcoming = engine.getSchedulePreview(channel.id, at, LiveBoard.GUIDE_PREVIEW_COUNT, rating)
+            if (current != null) nowPlaying[channel.id] = current
+            guide[channel.id] = listOfNotNull(current) + upcoming
+        }
+        return Board(at, nowPlaying, guide)
     }
 
     /** Recomputes the visible channel list (kid-safe: channel rule AND at least one allowed show). */

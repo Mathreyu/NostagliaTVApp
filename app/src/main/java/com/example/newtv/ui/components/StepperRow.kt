@@ -58,7 +58,7 @@ fun StepperRow(
         Box(
             modifier = Modifier
                 .width(260.dp)
-                .height(52.dp)
+                .height(48.dp)
                 .background(NostalgiaColors.GuideBlueDeep, NostalgiaShapes.Small),
             contentAlignment = Alignment.Center
         ) {
@@ -68,6 +68,85 @@ fun StepperRow(
     }
 }
 
+/** Read-only "label ........ value" row, aligned with [StepperRow]'s value column. */
+@Composable
+fun ValueRow(label: String, valueText: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = NostalgiaColors.TextMuted,
+            modifier = Modifier.weight(1f)
+        )
+        Box(
+            modifier = Modifier
+                .width(StepperValueColumnWidth)
+                .height(48.dp)
+                .padding(horizontal = 4.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(text = valueText, style = osdTextStyle(28, NostalgiaColors.TextMuted, glow = false), maxLines = 1)
+        }
+    }
+}
+
+/** "Label ........ [ VALUE ]" row whose value pill toggles on click; same column as [StepperRow]. */
+@Composable
+fun ToggleRow(
+    label: String,
+    valueText: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = NostalgiaShapes.Medium
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = NostalgiaColors.TextPrimary,
+            modifier = Modifier.weight(1f)
+        )
+        Surface(
+            onClick = onClick,
+            modifier = Modifier
+                .width(StepperValueColumnWidth)
+                .height(48.dp),
+            shape = ClickableSurfaceDefaults.shape(shape),
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = NostalgiaColors.GuideBlueDeep,
+                contentColor = NostalgiaColors.OsdGreen,
+                focusedContainerColor = NostalgiaColors.Focus,
+                focusedContentColor = NostalgiaColors.OnFocus,
+                pressedContainerColor = NostalgiaColors.FocusGlow,
+                pressedContentColor = NostalgiaColors.OnFocus
+            ),
+            scale = ClickableSurfaceDefaults.scale(focusedScale = NostalgiaFocus.Scale),
+            border = ClickableSurfaceDefaults.border(
+                border = Border(BorderStroke(2.dp, NostalgiaColors.GuideLine), 0.dp, shape),
+                focusedBorder = Border(BorderStroke(NostalgiaFocus.BorderWidth, NostalgiaColors.Focus), 0.dp, shape)
+            ),
+            glow = ClickableSurfaceDefaults.glow(
+                focusedGlow = Glow(NostalgiaFocus.GlowColor, NostalgiaFocus.GlowElevation)
+            )
+        ) {
+            Box(Modifier.fillMaxWidth().height(48.dp), contentAlignment = Alignment.Center) {
+                Text(text = valueText, style = osdTextStyle(30, Color.Unspecified, glow = false), maxLines = 1)
+            }
+        }
+    }
+}
+
+/** Width of the "- value +" cluster of a [StepperRow]. */
+private val StepperValueColumnWidth = 64.dp + 12.dp + 260.dp + 12.dp + 64.dp
+
 @Composable
 private fun StepKey(label: String, onClick: () -> Unit) {
     val shape = NostalgiaShapes.Medium
@@ -75,7 +154,7 @@ private fun StepKey(label: String, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .width(64.dp)
-            .height(52.dp),
+            .height(48.dp),
         shape = ClickableSurfaceDefaults.shape(shape),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = NostalgiaColors.SurfaceRaised,
@@ -94,7 +173,7 @@ private fun StepKey(label: String, onClick: () -> Unit) {
             focusedGlow = Glow(NostalgiaFocus.GlowColor, NostalgiaFocus.GlowElevation)
         )
     ) {
-        Box(Modifier.fillMaxWidth().height(52.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxWidth().height(48.dp), contentAlignment = Alignment.Center) {
             Text(text = label, style = MaterialTheme.typography.headlineMedium, color = Color.Unspecified)
         }
     }

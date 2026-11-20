@@ -7,39 +7,49 @@
     <string name="back">Back</string>
     <string name="dismiss">Dismiss</string>
 
+    <!-- Top bar -->
+    <string name="app_wordmark">NOSTALGIA TV</string>
+    <string name="kid_safe_badge">KID-SAFE</string>
+    <string name="channel_bug">CH %1$02d</string>
+    <string name="episode_code">S%1$dE%2$d</string>
+
+    <!-- Empty states -->
+    <string name="no_signal">NO SIGNAL</string>
+    <string name="no_signal_no_channels">No channels yet. Add one to start watching.</string>
+    <string name="no_signal_kid_safe">No channels are available in kid-safe mode. A parent can add one in the parent settings.</string>
+    <string name="no_signal_no_shows">This channel has no shows yet.</string>
+
     <!-- Home -->
-    <string name="home_title">Home</string>
-    <string name="home_featured">Featured</string>
-    <string name="home_channels">Channels</string>
-    <string name="home_on_now">On now</string>
-    <string name="home_tune_in">Tune in</string>
+    <string name="home_live_now">Live now</string>
+    <string name="home_coming_up">Coming up</string>
+    <string name="live_subtitle">%1$s • until %2$s</string>
     <string name="enable_kid_safe">Enable kid-safe mode</string>
     <string name="exit_kid_safe">Exit kid-safe mode</string>
     <string name="add_channel">Add channel</string>
     <string name="parent_settings">Parent settings</string>
 
     <!-- Channel -->
-    <string name="channel_title">Now Playing</string>
-    <string name="channel_heading">CH %1$02d  %2$s</string>
-    <string name="no_program">No program available</string>
+    <string name="channel_change_hint">CH ▲/▼ to change channel</string>
+    <string name="watch_now">Watch now</string>
+    <string name="guide">Guide</string>
+    <string name="minutes_left">%1$d min left</string>
     <string name="provider_line">Provider: %1$s</string>
     <string name="install_provider">Install %1$s</string>
-    <string name="play_now">Play now</string>
-    <string name="schedule">Schedule</string>
     <string name="edit_rules">Edit rules</string>
     <string name="edit_channel">Edit channel</string>
     <string name="up_next">Up next</string>
     <string name="program_time_range">%1$s – %2$s</string>
-    <string name="program_title_episode">%1$s • S%2$dE%3$d</string>
     <string name="program_time_episode">%1$s • S%2$dE%3$d</string>
     <string name="program_airs_at">%1$s (S%2$dE%3$d) airs at %4$s on CH %5$02d</string>
     <string name="provider_unavailable">%1$s is not available. Install it to watch.</string>
 
     <!-- Schedule -->
-    <string name="schedule_title">Schedule</string>
+    <string name="schedule_title">Guide</string>
+    <string name="listings">Listings</string>
 
     <!-- Rule editor -->
     <string name="rule_editor_title">Edit schedule rules</string>
+    <string name="rule_editor_help">Choose when this channel is on the air and how long each show runs.</string>
     <string name="rule_start">Start time</string>
     <string name="rule_end">End time</string>
     <string name="rule_slot_length">Slot length</string>
@@ -55,6 +65,10 @@
     <!-- Channel editor -->
     <string name="channel_editor_add_title">Add channel</string>
     <string name="channel_editor_edit_title">Edit channel</string>
+    <string name="channel_editor_help">Select a field to change it. Channel numbers are assigned automatically.</string>
+    <string name="kid_safe_only">Kid-safe only</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
     <string name="channel_name">Channel name</string>
     <string name="channel_name_placeholder">Select to type a name</string>
     <string name="channel_number">Channel number</string>
@@ -62,12 +76,11 @@
     <string name="channel_number_auto">Assigned when saved</string>
     <string name="age_rating">Age rating</string>
     <string name="age_rating_value">%1$d+</string>
-    <string name="kid_safe_only_on">Kid-safe only: ON</string>
-    <string name="kid_safe_only_off">Kid-safe only: OFF</string>
     <string name="error_channel_name_required">Channel name is required.</string>
     <string name="error_age_rating_range">Age rating must be 0–21.</string>
 
     <!-- Parental lock -->
+    <string name="pin_window_title">Kid-safe setup</string>
     <string name="pin_title">Parental lock</string>
     <string name="pin_create_title">Set a parental PIN</string>
     <string name="pin_create_message">Choose a %1$d–%2$d digit PIN. You\'ll need it to leave kid-safe mode.</string>

@@ -6,6 +6,7 @@ import com.example.newtv.R
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -101,13 +102,17 @@ object NostalgiaTokens {
 }
 
 /** OSD text style: phosphor-green glow, tracked out. */
-fun osdTextStyle(size: Int = 28, color: Color = NostalgiaColors.OsdGreen): TextStyle = TextStyle(
+fun osdTextStyle(
+    size: Int = 28,
+    color: Color = NostalgiaColors.OsdGreen,
+    glow: Boolean = true
+): TextStyle = TextStyle(
     fontFamily = NostalgiaFonts.Osd,
     fontWeight = FontWeight.Bold,
     fontSize = size.sp,
     letterSpacing = 1.sp,
     color = color,
-    shadow = Shadow(color.copy(alpha = 0.55f), Offset.Zero, 8f)
+    shadow = if (glow && color.isSpecified) Shadow(color.copy(alpha = 0.55f), Offset.Zero, 8f) else null
 )
 
 val LocalReducedMotion = staticCompositionLocalOf { false }

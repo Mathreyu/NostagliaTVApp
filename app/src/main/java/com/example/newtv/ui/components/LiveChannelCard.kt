@@ -90,7 +90,7 @@ fun LiveChannelCard(
                 Text(
                     text = nowTitle,
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (!nowSubtitle.isNullOrBlank()) {

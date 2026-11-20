@@ -12,11 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.example.newtv.R
 import com.example.newtv.security.KidSafePinManager
 import com.example.newtv.ui.components.ChannelChangeOverlay
 import com.example.newtv.ui.components.NostalgiaBackground
+import com.example.newtv.ui.components.NostalgiaWindow
 import com.example.newtv.ui.components.ParentalLockPad
 import com.example.newtv.ui.screens.ChannelEditorScreen
 import com.example.newtv.ui.screens.ChannelScreen
@@ -87,6 +87,7 @@ private fun ScreenContent(uiState: MainUiState, viewModel: MainViewModel) {
         )
         is Screen.Schedule -> ScheduleScreen(
             uiState = uiState,
+            channelId = screen.channelId,
             onBack = { viewModel.navigateBack() }
         )
         is Screen.RuleEditor -> RuleEditorScreen(
@@ -107,8 +108,9 @@ private fun ScreenContent(uiState: MainUiState, viewModel: MainViewModel) {
     }
 }
 
+/** Full-screen scrim with the parental lock keypad on a setup-menu window. */
 @Composable
-private fun PinOverlay(
+internal fun PinOverlay(
     state: PinDialogState,
     onDigit: (Char) -> Unit,
     onBackspace: () -> Unit,
@@ -140,20 +142,22 @@ private fun PinOverlay(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.88f))
-            .padding(48.dp),
+            .padding(horizontal = Spacing.SafeHorizontal, vertical = Spacing.SafeVertical),
         contentAlignment = Alignment.Center
     ) {
-        ParentalLockPad(
-            title = title,
-            message = message,
-            digits = state.digits.length,
-            maxDigits = KidSafePinManager.MAX_LENGTH,
-            error = state.error,
-            busy = state.busy,
-            onDigit = onDigit,
-            onBackspace = onBackspace,
-            onSubmit = onSubmit,
-            onCancel = onCancel
-        )
+        NostalgiaWindow(title = stringResource(R.string.pin_window_title)) {
+            ParentalLockPad(
+                title = title,
+                message = message,
+                digits = state.digits.length,
+                maxDigits = KidSafePinManager.MAX_LENGTH,
+                error = state.error,
+                busy = state.busy,
+                onDigit = onDigit,
+                onBackspace = onBackspace,
+                onSubmit = onSubmit,
+                onCancel = onCancel
+            )
+        }
     }
 }
