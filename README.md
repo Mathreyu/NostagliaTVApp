@@ -17,7 +17,7 @@ A Google TV app that creates virtual channels with scheduled-style programming a
 - Episode rotation with no-repeat windows
 - Provider deep linking with availability checks
 - Autoplay/resume flow after returning from playback
-- Kid-safe mode with PIN exit
+- Kid-safe mode with a parent-set PIN: stored only as a salted PBKDF2 hash, locked for 60 s after 5 wrong attempts, and kept on across app restarts
 - Local Room storage
 
 ## Tech Stack
